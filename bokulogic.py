@@ -62,7 +62,7 @@ class BokuGame:
           break
         if i == 3:
           x, y, z = coord
-          capture_choice.append([(x + xd, y + yd, z + zd), (x + xd*2, y + yd*2), (z + zd*2)])
+          capture_choice.extend([(x + xd, y + yd, z + zd), (x + xd*2, y + yd*2), (z + zd*2)])
 
     return capture_choice
 

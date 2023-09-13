@@ -10,11 +10,28 @@ def start_game():
 
     while game_on:
         for player in ["white", "black"]:
-            illegal = True
-            while illegal:
-                tile = input(f"which tile does {player} place?")
+            illegal_move = True
+            while  illegal_move and game_on:
+                tile = input(f"which tile does {player} place? ")
                 tile_coord = BokuGame.notation_to_coord(tile)
-                _, _, illegal = game.place_tile(tile_coord, player)
+                win, capture_choice, illegal_move = game.place_tile(tile_coord, player)
+                print(win)
+                
+                if win:
+                    print(f"{player} has won the game!")
+                    game_on = False
+                    break
+
+                if capture_choice:
+                    illegal_capture = True
+                    while illegal_capture:
+                     capture = input(f"which tile does {player} capture from the following list?\
+                                     \n {BokuGame.coord_to_notation(capture_choice)}")
+                     if BokuGame.notation_to_coord(capture_choice) in capture_choice:
+                         illegal_capture =False
+                         game.capture_tile(capture_choice)
+
+
         
         draw_board(game.occupied_list)
 

@@ -38,7 +38,7 @@ def draw_board(occupied):
   # Also add scatter points in hexagon centers
   ax.scatter(hcoord, vcoord, alpha=0.0)
 
-  plt.show()
+  plt.show(block=False)
 
 if __name__ == "__main__":
   occupied = {(-2,6,-4):"white",

@@ -23,12 +23,11 @@ class BokuGame:
                         (1,0,-1)] #ne
 
   def win_check(self, coord): #untested
-    curr_coord = coord
     color = self.occupied_list[coord]
-
     for vect in self.neibghbour_vectors:
+      curr_coord = coord
       for i in range(4): #we need to find 4 neighbours to make 5 in row
-        xi, yi, zi = coord
+        xi, yi, zi = curr_coord
         new_coord = xi + vect[0], yi+ vect[1], zi + vect[2]
 
         if new_coord in self.occupied_list and self.occupied_list[new_coord] == color:
@@ -42,7 +41,6 @@ class BokuGame:
     return False
 
   def capture_check(self, coord): #untested
-    curr_coord = coord
     colors = []
     if self.occupied_list[coord] == "black":
       colors.extend(["white","white","black"])
@@ -52,6 +50,7 @@ class BokuGame:
     capture_choice = []
     for vect in self.neibghbour_vectors:
       xd, yd, zd = vect
+      curr_coord = coord
       for i in range(3): #we need to find 4 neighbours to make a capture
         xi, yi, zi = curr_coord
         new_coord = xi + xd, yi + yd, zi + zd
@@ -60,9 +59,9 @@ class BokuGame:
           curr_coord = new_coord
         else:
           break
-        if i == 3:
+        if i == 2:
           x, y, z = coord
-          capture_choice.extend([(x + xd, y + yd, z + zd), (x + xd*2, y + yd*2), (z + zd*2)])
+          capture_choice.extend([(x + xd, y + yd, z + zd), (x + xd*2, y + yd*2, z + zd*2)])
 
     return capture_choice
 
@@ -93,10 +92,10 @@ class BokuGame:
 
     # move the tile from occupied to open
     del self.occupied_list[tile]
-    self.open_coord.append(tile)
+    self.open_coord.add(tile) 
 
     # block the tile for the next play
-    no_play_tile = tile
+    self.no_play_tile = tile
 
   @staticmethod
   def notation_to_coord(notation):

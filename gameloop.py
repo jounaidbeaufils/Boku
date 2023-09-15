@@ -5,9 +5,17 @@ def start_game():
     game_on = True
     game = BokuGame()
 
-    #black_ai_question = input("Is black an AI? (y/n)")
-    #white_ai_question = input("Is white am AI? (y/n)")
+    #starting board (for testing)
+    white_tiles = []
+    black_tiles = []
 
+    for notation in white_tiles:
+        game.place_tile(BokuGame.notation_to_coord(notation), "white")
+    
+    for notation in black_tiles:
+        game.place_tile(BokuGame.notation_to_coord(notation), "black")
+
+    #Play the game
     while game_on:
         for player in ["white", "black"]:
             illegal_move = True
@@ -15,8 +23,7 @@ def start_game():
                 tile = input(f"which tile does {player} place? ")
                 tile_coord = BokuGame.notation_to_coord(tile)
                 win, capture_choice, illegal_move = game.place_tile(tile_coord, player)
-                print(win)
-                
+
                 if win:
                     print(f"{player} has won the game!")
                     game_on = False
@@ -25,15 +32,21 @@ def start_game():
                 if capture_choice:
                     illegal_capture = True
                     while illegal_capture:
-                     capture = input(f"which tile does {player} capture from the following list?\
-                                     \n {BokuGame.coord_to_notation(capture_choice)}")
-                     if BokuGame.notation_to_coord(capture_choice) in capture_choice:
+                     notation_list = [BokuGame.coord_to_notation(x, y, z) for x,y,z in capture_choice]
+                     draw_board(game.occupied_list)
+                     capture = input(f"which tile does {player} capture from the following list {notation_list}? ")
+                     if BokuGame.notation_to_coord(capture) in capture_choice:
                          illegal_capture =False
-                         game.capture_tile(capture_choice)
+                         game.capture_tile(BokuGame.notation_to_coord(capture))
+        print()
 
 
         
         draw_board(game.occupied_list)
+
+    restart = input("do you want to play another game (y/n)? ")
+    if restart == "y":
+        start_game()
 
 if __name__ == "__main__":
     start_game()

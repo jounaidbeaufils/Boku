@@ -16,16 +16,17 @@ class BokuGame:
                 (5, 4, -9), (4, 5, -9), (3, 6, -9), (2, 7, -9), (1, 8, -9), (0, 9, -9)} #J
 
     self.open_coord = self.all_coords.copy()
-
     self.occupied_list = {}
-    self.no_play_tile = tuple()
-
     self.neibghbour_vectors = [(0,1,-1), #n
                         (0,-1,1), #s
                         (1,-1,0), #se
                         (-1,1,0), #nw
                         (-1,0,1), #sw
                         (1,0,-1)] #ne
+    
+    self.no_play_tile = tuple()
+    self.history = []
+
 
   def win_check(self, coord): #untested
     color = self.occupied_list[coord]
@@ -83,9 +84,10 @@ class BokuGame:
     else:
       no_play_tile = tuple() #reset; tile is only blocked for one play
 
-      # move tile from open to occupied
+      # move tile from open to occupied and write history
       self.open_coord.remove(coord)
       self.occupied_list[coord] = tile_color
+      self.history.append([coord])
 
       # check for win or captures
       win = self.win_check(coord)
@@ -93,11 +95,13 @@ class BokuGame:
 
     return win, capture_choice, illegal
 
-  def capture_tile(self, tile):
+  def capture_tile(self, tile, write_history=True):
 
-    # move the tile from occupied to open
+    # move the tile from occupied to open and write history
     del self.occupied_list[tile]
     self.open_coord.add(tile) 
+    if write_history:
+      self.history[-1].append(tile) # added the removed tile on the last turn
 
     # block the tile for the next play
     self.no_play_tile = tile
@@ -122,11 +126,30 @@ class BokuGame:
       ax.add_patch(hexagon)
       ax.text(x, y, BokuGame.coord_to_notation(xi,yi,zi), ha='center', va='center', fontsize=10)
 
-    # Also add scatter points in hexagon centers
+    # Also add scatter points in hexagon centers ###remove?###
     ax.scatter(hcoord, vcoord, alpha=0.0)
 
     plt.show(block=False)
 
+  def undo(self):
+    """this function will undo the one players action"""
+    action: str = self.history.pop()
+    print(f"attempting to undo {action}")
+    tile = ""
+    capture = ""
+
+    # checking if the last turn included a capture
+    if len(action) > 1:
+      tile, capture = action[0], action[1]
+      self.place_tile(capture, False)
+
+    else:
+      tile = action[0]
+    
+    print(self.occupied_list.keys())
+    del self.occupied_list[tile]
+    self.open_coord.add(tile)
+      
   @staticmethod
   def notation_to_coord(notation):
     letter = notation[0].upper()

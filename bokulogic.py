@@ -17,16 +17,26 @@ class BokuGame:
 
     self.open_coord = self.all_coords.copy()
     self.occupied_list = {}
+    self.no_play_tile = tuple()
+    self.history = []
+
     self.neibghbour_vectors = [(0,1,-1), #n
                         (0,-1,1), #s
                         (1,-1,0), #se
                         (-1,1,0), #nw
                         (-1,0,1), #sw
                         (1,0,-1)] #ne
-    
-    self.no_play_tile = tuple()
-    self.history = []
 
+    self.valid_notation = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 
+                            'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 
+                            'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 
+                            'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 
+                            'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 
+                            'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 
+                                  'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 
+                                        'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 
+                                              'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 
+                                                    'J5', 'J6', 'J7', 'J8', 'J9', 'J10']
 
   def win_check(self, coord): #untested
     color = self.occupied_list[coord]
@@ -134,7 +144,6 @@ class BokuGame:
   def undo(self):
     """this function will undo the one players action"""
     action: str = self.history.pop()
-    print(f"attempting to undo {action}")
     tile = ""
     capture = ""
 
@@ -146,7 +155,6 @@ class BokuGame:
     else:
       tile = action[0]
     
-    print(self.occupied_list.keys())
     del self.occupied_list[tile]
     self.open_coord.add(tile)
       
@@ -171,3 +179,4 @@ class BokuGame:
     notation += str(y + 1)
 
     return notation
+  

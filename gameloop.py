@@ -1,4 +1,3 @@
-from bokudisplay import draw_board
 from bokulogic import BokuGame
 
 def start_game():
@@ -6,8 +5,8 @@ def start_game():
     game = BokuGame()
 
     #starting board (for testing)
-    white_tiles = []
-    black_tiles = []
+    white_tiles = ["g3"]
+    black_tiles = ["g4","g5"]
 
     for notation in white_tiles:
         game.place_tile(BokuGame.notation_to_coord(notation), "white")
@@ -33,16 +32,14 @@ def start_game():
                     illegal_capture = True
                     while illegal_capture:
                      notation_list = [BokuGame.coord_to_notation(x, y, z) for x,y,z in capture_choice]
-                     draw_board(game.occupied_list)
+                     game.draw_board()
                      capture = input(f"which tile does {player} capture from the following list {notation_list}? ")
                      if BokuGame.notation_to_coord(capture) in capture_choice:
                          illegal_capture =False
                          game.capture_tile(BokuGame.notation_to_coord(capture))
         print()
-
-
         
-        draw_board(game.occupied_list)
+        game.draw_board()
 
     restart = input("do you want to play another game (y/n)? ")
     if restart == "y":

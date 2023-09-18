@@ -5,8 +5,8 @@ def start_game():
     game = BokuGame()
 
     #starting board (for testing)
-    white_tiles = ["g3"]
-    black_tiles = ["g4","g5"]
+    white_tiles = []
+    black_tiles = []
 
     for notation in white_tiles:
         game.place_tile(BokuGame.notation_to_coord(notation), "white")
@@ -19,9 +19,17 @@ def start_game():
         for player in ["white", "black"]:
             illegal_move = True
             while  illegal_move and game_on:
+                # input tile
                 tile = input(f"which tile does {player} place? ")
-                tile_coord = BokuGame.notation_to_coord(tile)
-                win, capture_choice, illegal_move = game.place_tile(tile_coord, player)
+
+                # check for commands and run them
+                if tile[0] == "\\":
+                    run_command(tile[1:], game)
+                    continue
+
+                else:
+                    tile = BokuGame.notation_to_coord(tile)
+                win, capture_choice, illegal_move = game.place_tile(tile, player)
 
                 if win:
                     print(f"{player} has won the game!")
@@ -32,11 +40,11 @@ def start_game():
                     illegal_capture = True
                     while illegal_capture:
                      notation_list = [BokuGame.coord_to_notation(x, y, z) for x,y,z in capture_choice]
-                     game.draw_board()
                      capture = input(f"which tile does {player} capture from the following list {notation_list}? ")
-                     if BokuGame.notation_to_coord(capture) in capture_choice:
+                     capture = BokuGame.notation_to_coord(capture)
+                     if capture in capture_choice:
                          illegal_capture =False
-                         game.capture_tile(BokuGame.notation_to_coord(capture))
+                         game.capture_tile(capture)
         print()
         
         game.draw_board()
@@ -44,6 +52,14 @@ def start_game():
     restart = input("do you want to play another game (y/n)? ")
     if restart == "y":
         start_game()
+
+def run_command(command, game):
+    command_dict = {
+        "undo" : game.undo,
+        "display" : game.draw_board
+    }
+
+    command_dict[command]()
 
 if __name__ == "__main__":
     start_game()

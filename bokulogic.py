@@ -27,7 +27,7 @@ class BokuGame:
                         (-1,0,1), #sw
                         (1,0,-1)] #ne
 
-    self.valid_notation = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 
+    self.valid_notation =  {'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 
                             'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 
                             'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 
                             'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 
@@ -36,7 +36,7 @@ class BokuGame:
                                   'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 
                                         'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 
                                               'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 
-                                                    'J5', 'J6', 'J7', 'J8', 'J9', 'J10']
+                                                    'J5', 'J6', 'J7', 'J8', 'J9', 'J10'}
 
   def win_check(self, coord): #untested
     color = self.occupied_list[coord]
@@ -81,7 +81,7 @@ class BokuGame:
 
     return capture_choice
 
-  def place_tile(self, coord, tile_color):
+  def place_tile(self, coord, tile_color, write_history=True):
     win = False
     capture_choice = []
     illegal = False
@@ -97,7 +97,8 @@ class BokuGame:
       # move tile from open to occupied and write history
       self.open_coord.remove(coord)
       self.occupied_list[coord] = tile_color
-      self.history.append([coord])
+      if write_history:
+        self.history.append([coord])
 
       # check for win or captures
       win = self.win_check(coord)
@@ -111,10 +112,11 @@ class BokuGame:
     del self.occupied_list[tile]
     self.open_coord.add(tile) 
     if write_history:
-      self.history[-1].append(tile) # added the removed tile on the last turn
+      # add the removed tile on the last turn's entry
+      self.history[-1].append(tile)
 
-    # block the tile for the next play
-    self.no_play_tile = tile
+      # block the tile for the next play
+      self.no_play_tile = tile
 
   def draw_board(self):
     colors = [self.occupied_list.get(tuple(c), "blue") for c in self.all_coords]
@@ -143,23 +145,35 @@ class BokuGame:
 
   def undo(self):
     """this function will undo the one players action"""
-    action = ""
 
     if self.history:
+      captured_color = "white" if len(self.history) % 2 == 0 else "black"
       action = self.history.pop()
+      previous_action = self.history[-1]
       tile = ""
-      capture = ""
+      captured = ""
 
       # checking if the last turn included a capture
       if len(action) > 1:
-        tile, capture = action[0], action[1]
-        self.place_tile(capture, False)
+        tile, captured = action[0], action[1]
+
+        #reset the no_play_tile because the capture was undone
+        self.no_play_tile = tuple()
+
+        # replace the captured tile without writing to history
+        self.place_tile(captured,captured_color,False)
+
+      # after the undo if we are right after a capture, set the no_play_tile
+      if len(previous_action) > 1:
+        self.no_play_tile = previous_action[1]
 
       else:
         tile = action[0]
       
-      del self.occupied_list[tile]
-      self.open_coord.add(tile)
+      # remove the tile played using capture without writing to history
+      # wriet_history=False also disables the tile lock 
+      self.capture_tile(tile, False)
+
     return action
         
   def notation_to_coord(self, notation: str):

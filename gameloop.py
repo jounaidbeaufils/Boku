@@ -69,7 +69,8 @@ def run_command(command: str, game: BokuGame):
         "undo" : game.undo,
         "display" : game.draw_board,
         # sorry for the bad code inside bad code inside bad code, but i don't want to declare a wrapper function
-        "history" : lambda:print([[game.coord_to_notation(coord) for coord in action] for action in game.history])
+        "history" : lambda: print([[game.coord_to_notation(coord) for coord in action] for action in game.history]),
+        "occupied": lambda: print(game.occupied_list)
     }
     if command not in command_dict.keys():
         print(f"command '\{command}' is not a valid command")
@@ -79,7 +80,7 @@ def run_command(command: str, game: BokuGame):
         data = command_dict[command]()
 
         # print command data
-        print_list = ["history"]
+        print_list = []
         if command in print_list:
             print(data)
 

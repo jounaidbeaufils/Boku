@@ -70,7 +70,7 @@ def run_command(command: str, game: BokuGame):
         "display" : game.draw_board,
         # sorry for the bad code inside bad code inside bad code, but i don't want to declare a wrapper function
         "history" : lambda: print([[game.coord_to_notation(coord) for coord in action] for action in game.history]),
-        "occupied": lambda: print(game.occupied_list)
+        "occupied": lambda: print(game.occupied_dict)
     }
     if command not in command_dict.keys():
         print(f"command '\{command}' is not a valid command")

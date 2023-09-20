@@ -16,7 +16,7 @@ class BokuGame:
                 (5, 4, -9), (4, 5, -9), (3, 6, -9), (2, 7, -9), (1, 8, -9), (0, 9, -9)} #J
 
     self.open_coord = self.all_coords.copy()
-    self.occupied_list = {}
+    self.occupied_dict = {}
     self.no_play_tile = tuple()
     self.history = []
 
@@ -39,14 +39,14 @@ class BokuGame:
                                                     'J5', 'J6', 'J7', 'J8', 'J9', 'J10'}
 
   def win_check(self, coord): #untested
-    color = self.occupied_list[coord]
+    color = self.occupied_dict[coord]
     for vect in self.neibghbour_vectors:
       curr_coord = coord
       for i in range(4): #we need to find 4 neighbours to make 5 in row
         xi, yi, zi = curr_coord
         new_coord = xi + vect[0], yi+ vect[1], zi + vect[2]
 
-        if new_coord in self.occupied_list and self.occupied_list[new_coord] == color:
+        if new_coord in self.occupied_dict and self.occupied_dict[new_coord] == color:
           curr_coord = new_coord
         else:
           break
@@ -58,7 +58,7 @@ class BokuGame:
 
   def capture_check(self, coord): #untested
     colors = []
-    if self.occupied_list[coord] == "black":
+    if self.occupied_dict[coord] == "black":
       colors.extend(["white","white","black"])
     else:
       colors.extend(["black","black","white"])
@@ -71,7 +71,7 @@ class BokuGame:
         xi, yi, zi = curr_coord
         new_coord = xi + xd, yi + yd, zi + zd
 
-        if new_coord in self.occupied_list and self.occupied_list[new_coord] == colors[i]:
+        if new_coord in self.occupied_dict and self.occupied_dict[new_coord] == colors[i]:
           curr_coord = new_coord
         else:
           break
@@ -96,7 +96,7 @@ class BokuGame:
 
       # move tile from open to occupied and write history
       self.open_coord.remove(coord)
-      self.occupied_list[coord] = tile_color
+      self.occupied_dict[coord] = tile_color
       if write_history:
         self.history.append([coord])
 
@@ -109,7 +109,7 @@ class BokuGame:
   def capture_tile(self, tile, write_history=True):
 
     # move the tile from occupied to open and write history
-    del self.occupied_list[tile]
+    del self.occupied_dict[tile]
     self.open_coord.add(tile) 
     if write_history:
       # add the removed tile on the last turn's entry
@@ -119,7 +119,7 @@ class BokuGame:
       self.no_play_tile = tile
 
   def draw_board(self):
-    colors = [self.occupied_list.get(tuple(c), "blue") for c in self.all_coords]
+    colors = [self.occupied_dict.get(tuple(c), "blue") for c in self.all_coords]
 
     # Horizontal cartesian coords
     hcoord = [c[0] for c in self.all_coords]

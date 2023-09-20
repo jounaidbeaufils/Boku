@@ -129,12 +129,12 @@ class BokuGame:
     ax.set_aspect('equal')
 
     # Add some colored hexagons and labels
-    for x, y, color, (xi, yi, zi) in zip(hcoord, vcoord, colors, self.all_coords):
+    for x, y, color, coord in zip(hcoord, vcoord, colors, self.all_coords):
       hexagon = RegularPolygon((x, y), numVertices=6, radius=2. / 3,
                                 orientation=np.radians(30), facecolor=color,
                                 alpha=0.3, edgecolor='k')
       ax.add_patch(hexagon)
-      ax.text(x, y, BokuGame.coord_to_notation(xi,yi,zi), ha='center', va='center', fontsize=10)
+      ax.text(x, y, self.coord_to_notation(coord), ha='center', va='center', fontsize=10)
 
     # Also add scatter points in hexagon centers ###remove?###
     ax.scatter(hcoord, vcoord, alpha=0.0)
@@ -143,40 +143,49 @@ class BokuGame:
 
   def undo(self):
     """this function will undo the one players action"""
-    action: str = self.history.pop()
-    tile = ""
-    capture = ""
+    action = ""
 
-    # checking if the last turn included a capture
-    if len(action) > 1:
-      tile, capture = action[0], action[1]
-      self.place_tile(capture, False)
+    if self.history:
+      action = self.history.pop()
+      tile = ""
+      capture = ""
 
-    else:
-      tile = action[0]
-    
-    del self.occupied_list[tile]
-    self.open_coord.add(tile)
+      # checking if the last turn included a capture
+      if len(action) > 1:
+        tile, capture = action[0], action[1]
+        self.place_tile(capture, False)
+
+      else:
+        tile = action[0]
       
-  @staticmethod
-  def notation_to_coord(notation):
-    letter = notation[0].upper()
-    z = -(ord(letter) - ord('A'))
+      del self.occupied_list[tile]
+      self.open_coord.add(tile)
+    return action
+        
+  def notation_to_coord(self, notation: str):
+    """will return (-99, -99, -99)"""
+    x, y, z = -99, -99, -99
+    if notation.upper() in self.valid_notation:    
+      letter = notation[0].upper()
+      z = -(ord(letter) - ord('A'))
 
-    number = notation[1:]
-    y = int(number) -1
+      number = notation[1:]
+      y = int(number) -1
 
-    x = 1 - int(number) - z
+      x = 1 - int(number) - z
 
-    return x, y, z
+    return (x, y, z)
   
-  @staticmethod
-  def coord_to_notation(x,y,z):
+  def coord_to_notation(self, coord):
+    """will return an empty string if the coord is not on the boord"""
     notation = ""
-    alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if coord in self.all_coords:
+      x, y, z = coord
+      notation = ""
+      alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-    notation += alpha[-z]
-    notation += str(y + 1)
+      notation += alpha[-z]
+      notation += str(y + 1)
 
     return notation
   

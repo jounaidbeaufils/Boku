@@ -38,7 +38,7 @@ class BokuGame:
                                               'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 
                                                     'J5', 'J6', 'J7', 'J8', 'J9', 'J10'}
 
-  def win_check(self, coord): #untested
+  def win_check(self, coord):
     color = self.occupied_dict[coord]
     for vect in self.neibghbour_vectors:
       curr_coord = coord
@@ -56,7 +56,7 @@ class BokuGame:
 
     return False
 
-  def capture_check(self, coord): #untested
+  def capture_check(self, coord):
     colors = []
     if self.occupied_dict[coord] == "black":
       colors.extend(["white","white","black"])
@@ -82,6 +82,7 @@ class BokuGame:
     return capture_choice
 
   def place_tile(self, coord, tile_color, write_history=True):
+    """places a tile, and then calls win check and capture check"""
     win = False
     capture_choice = []
     illegal = False
@@ -107,7 +108,7 @@ class BokuGame:
     return win, capture_choice, illegal
 
   def capture_tile(self, tile, write_history=True):
-
+    """captes the tile it recieved in paramaters and locks that tile"""
     # move the tile from occupied to open and write history
     del self.occupied_dict[tile]
     self.open_coord.add(tile) 
@@ -119,6 +120,7 @@ class BokuGame:
       self.no_play_tile = tile
 
   def draw_board(self):
+    """draw the board"""
     colors = [self.occupied_dict.get(tuple(c), "blue") for c in self.all_coords]
 
     # Horizontal cartesian coords

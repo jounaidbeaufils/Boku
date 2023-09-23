@@ -1,18 +1,17 @@
+"""This module is used to run a human vs human game of boku"""
 from bokulogic import BokuGame
 
 def start_game():
+    """This methods starts a game of boku"""
     game_on = True
     game = BokuGame()
 
-    #starting board (for testing)
-    white_tiles = []
-    black_tiles = []
+    #starting board (for testing purposes)
+    for notation in []:
+        game.place_tile(game.notation_to_coord(notation), "white")
 
-    for notation in white_tiles:
-        game.place_tile(BokuGame.notation_to_coord(notation), "white")
-    
-    for notation in black_tiles:
-        game.place_tile(BokuGame.notation_to_coord(notation), "black")
+    for notation in []:
+        game.place_tile(game.notation_to_coord(notation), "black")
 
     #Play the game
     last_turn = 0
@@ -59,21 +58,23 @@ def start_game():
                 if capture in capture_choice:
                     illegal_capture =False
                     game.capture_tile(capture)
-        
+
     restart = input("do you want to play another game (y/n)? ")
     if restart == "y":
         start_game()
 
 def run_command(command: str, game: BokuGame):
+    """this fuction is used to execute commands while the game loop is rnning"""
     command_dict = {
         "undo" : game.undo,
         "display" : game.draw_board,
-        # sorry for the bad code inside bad code inside bad code, but i don't want to declare a wrapper function
+        # i don't want to declare a wrapper function
+        # this list comprehension converts from coordinates to notation
         "history" : lambda: print([[game.coord_to_notation(coord) for coord in action] for action in game.history]),
         "occupied": lambda: print(game.occupied_dict)
     }
-    if command not in command_dict.keys():
-        print(f"command '\{command}' is not a valid command")
+    if command not in command_dict:
+        print(f"command '\\{command}' is not a valid command")
 
     else:
         # run command

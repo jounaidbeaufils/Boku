@@ -78,9 +78,8 @@ class BokuGame:
                 else:
                     break
                 if i == 2:
-                    x, y, z = coord
-                    capture_choice.extend([(x + vect[0], y + vect[1], z + vect[2]), 
-                                           (x + vect[0]*2, y + vect[1]*2, z + vect[2]*2)])
+                    capture_choice.extend([(coord[0] + vect[0], coord[1] + vect[1], coord[2] + vect[2]),
+                                           (coord[0] + vect[0]*2, coord[1] + vect[1]*2, coord[2] + vect[2]*2)])
 
         return capture_choice
 

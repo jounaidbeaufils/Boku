@@ -52,23 +52,24 @@ class BokuGame:
         win = False
         # get the three axi
         for vect in self.neibghbour_vectors[0:3]:
-            print(f"vect {vect}")
             line_coords = []
             # get the positions in each axis
             for i in range(-4,5):
-                line_coord = (coord[0] + vect[0]*i, coord[1] + vect[1], coord[2] + vect[2]*i)
-                line_coords.append(line_coord)
-                value_dict[line_coord] = 0
+                line_coord = (coord[0] + vect[0]*i, coord[1] + vect[1]*i, coord[2] + vect[2]*i)
+                #print(f"found at ({vect}, {i}){self.coord_to_notation(line_coord)}")
+                if line_coord in self.occupied_dict:
+                    #print(f"added {self.coord_to_notation(line_coord)} to line_coords and value_dict")
+                    line_coords.append(line_coord)
+                    value_dict[line_coord] = 0
 
             # for every sub_line in a line
-            for s_l in range(5):
+            for s_l in range(len(line_coords) - 4):
                 counter = 0
                 sub_line_addition = [0 for _ in range(5)]
 
                 # every tile n in a sub_line
                 for t_n in range(5):
-                    if line_coords[s_l + t_n] not in self.occupied_dict or \
-                        self.occupied_dict[line_coords[s_l + t_n]] == opp_color:
+                    if self.occupied_dict[line_coords[s_l + t_n]] == opp_color:
                         sub_line_addition[t_n] = -99
                         break
                     if self.occupied_dict[line_coords[s_l + t_n]]  == "free":

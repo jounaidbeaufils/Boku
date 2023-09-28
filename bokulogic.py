@@ -19,16 +19,16 @@ class BokuGame:
                            (5, 4, -9), (4, 5, -9), (3, 6, -9), (2, 7, -9), (1, 8, -9), (0, 9, -9)} #J
 
         self.open_coord = self.all_coords.copy()
-        self.occupied_dict = {}
+        self.occupied_dict = {coord : "free" for coord in self.all_coords}
         self.no_play_tile = tuple()
         self.history = []
 
         self.neibghbour_vectors = [(0,1,-1), #n
-                            (0,-1,1), #s
-                            (1,-1,0), #se
-                            (-1,1,0), #nw
-                            (-1,0,1), #sw
-                            (1,0,-1)] #ne
+                                   (1,0,-1), #ne
+                                   (-1,1,0), #nw
+                                   (0,-1,1), #s
+                                   (1,-1,0), #se
+                                   (-1,0,1)] #sw
 
         self.valid_notation =  {'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 
                                 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 
@@ -42,56 +42,59 @@ class BokuGame:
                                                         'J5', 'J6', 'J7', 'J8', 'J9', 'J10'}
 
     def win_check(self, coord):
-        """checks for 5 tiles in a row of the same color from the starting point, coord"""
-        color = self.occupied_dict[coord]
-        for vect in self.neibghbour_vectors:
-            curr_coord = coord
-            for i in range(4): #we need to find 4 neighbours to make 5 in row
-                new_coord = curr_coord[0] + vect[0], curr_coord[1] + vect[1], curr_coord[2] + vect[2]
+        """this function checks for a win and also returns the value of every tile on the axi,
+        this value is the contribution that this tile, if placed, contributes to a win on """
 
-                if new_coord in self.occupied_dict and self.occupied_dict[new_coord] == color:
-                    curr_coord = new_coord
-                else:
-                    break
+        win_color = self.occupied_dict[coord]
+        opp_color = "white" if win_color == "black" else "black"
 
-                if i == 3:
-                    return True
+        value_dict = {}
+        win = False
+        # get the three axi
+        for vect in self.neibghbour_vectors[0:3]:
+            print(f"vect {vect}")
+            line_coords = []
+            # get the positions in each axis
+            for i in range(-4,5):
+                line_coord = (coord[0] + vect[0]*i, coord[1] + vect[1], coord[2] + vect[2]*i)
+                line_coords.append(line_coord)
+                value_dict[line_coord] = 0
 
-        return False
+            # for every sub_line in a line
+            for s_l in range(5):
+                counter = 0
+                sub_line_addition = [0 for _ in range(5)]
+
+                # every tile n in a sub_line
+                for t_n in range(5):
+                    if line_coords[s_l + t_n] not in self.occupied_dict or \
+                        self.occupied_dict[line_coords[s_l + t_n]] == opp_color:
+                        sub_line_addition[t_n] = -99
+                        break
+                    if self.occupied_dict[line_coords[s_l + t_n]]  == "free":
+                        sub_line_addition[t_n] = 1
+                        counter += 1
+
+                if sum(sub_line_addition) == 0:
+                    win = True
+                    return win, value_dict
+
+                if sum(sub_line_addition) > 0:
+                    for t_n, value in enumerate(sub_line_addition):
+                        value_dict[line_coords[s_l + t_n]] += value / counter
+
+        return win, value_dict
 
     def capture_check(self, coord):
-        """Check for a capture using the capture pattern , from the starting point coord"""
-        colors = []
-        if self.occupied_dict[coord] == "black":
-            colors.extend(["white","white","black"])
-        else:
-            colors.extend(["black","black","white"])
-
-        capture_choice = []
-        for vect in self.neibghbour_vectors:
-            curr_coord = coord
-            for i in range(3): #we need to find 4 neighbours to make a capture
-                new_coord = curr_coord[0] + vect[0], curr_coord[1] + vect[1], curr_coord[2] + vect[2]
-
-                if new_coord in self.occupied_dict and self.occupied_dict[new_coord] == colors[i]:
-                    curr_coord = new_coord
-                else:
-                    break
-                if i == 2:
-                    capture_choice.extend([(coord[0] + vect[0], coord[1] + vect[1], coord[2] + vect[2]),
-                                           (coord[0] + vect[0]*2, coord[1] + vect[1]*2, coord[2] + vect[2]*2)])
-
-        return capture_choice
+        pass
 
     def place_tile(self, coord, tile_color, write_history=True):
         """places a tile, and then calls win check and capture check"""
 
-        win = False
-        capture_choice = []
         illegal = False
 
         # check for if the tile is illegal
-        if coord == self.no_play_tile or coord not in self.open_coord:
+        if coord == self.no_play_tile or self.occupied_dict[coord] != "free":
             illegal = True
 
         # perform legal move
@@ -104,11 +107,7 @@ class BokuGame:
             if write_history:
                 self.history.append([coord])
 
-            # check for win or captures
-            win = self.win_check(coord)
-            capture_choice = self.capture_check(coord)
-
-        return win, capture_choice, illegal
+        return illegal
 
     def capture_tile(self, tile, write_history=True):
         """captes the tile it recieved in paramaters and locks that tile"""
@@ -127,6 +126,7 @@ class BokuGame:
         """draw the board"""
 
         colors = [self.occupied_dict.get(tuple(c), "blue") for c in self.all_coords]
+        colors = [color if color != "free" else "blue" for color in colors]
 
         # Horizontal cartesian coords
         hcoord = [c[0] for c in self.all_coords]
@@ -184,7 +184,7 @@ class BokuGame:
         return action
 
     def notation_to_coord(self, notation: str):
-        """will return (-99, -99, -99)"""
+        """will return (-99, -99, -99) if the notation is invalid"""
 
         coord = [-99, -99, -99]
         if notation.upper() in self.valid_notation:

@@ -113,23 +113,23 @@ class BokuGame:
 
             # for every sub_line in a line
             for s_l in range(len(line_coords) - 3):
-                sub_line_addition = 0
+                pattern_match_count = 0
 
                 # every tile n in a sub_line
                 for i, t_n in enumerate(range(4)):
 
                     # break if the tile does not match the pattern
-                    if self.occupied_dict[line_coord[s_l + t_n]] == capture_pattern[i]:
-                        sub_line_addition += 1
+                    if self.occupied_dict[line_coords[s_l + t_n]] == capture_pattern[i]:
+                        pattern_match_count += 1
                     else:
                         break
 
                 # check if a capture is available next turn
-                if sum(sub_line_addition) == 3:
+                if pattern_match_count == 3:
                     value_dict[line_coords[s_l + 3]] = 1
 
                 # check if a capture hasoccured
-                if sum(sub_line_addition) == 4:
+                if pattern_match_count == 4:
                     # add the second and third tiles as capturable
                     capture_choice.append(line_coords[s_l + 1])
                     capture_choice.append(line_coords[s_l + 2])

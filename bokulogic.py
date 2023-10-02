@@ -7,16 +7,17 @@ class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
     def __init__(self):
-        self.all_coords = {(0, 0, 0), (-1, 1, 0), (-2, 2, 0), (-3, 3, 0), (-4, 4, 0), (-5, 5, 0), #A
-                           (1, 0, -1), (0, 1, -1), (-1, 2, -1), (-2, 3, -1), (-3, 4, -1), (-4, 5, -1), (-5, 6, -1), #B
-                           (2, 0, -2), (1, 1, -2), (0, 2, -2), (-1, 3, -2), (-2, 4, -2), (-3, 5, -2), (-4, 6, -2), (-5, 7, -2), #C
-                           (3, 0, -3), (2, 1, -3), (1, 2, -3), (0, 3, -3), (-1, 4, -3), (-2, 5, -3), (-3, 6, -3), (-4, 7, -3), (-5, 8, -3), #D
-                           (4, 0, -4), (3, 1, -4), (2, 2, -4), (1, 3, -4), (0, 4, -4), (-1, 5, -4), (-2, 6, -4), (-3, 7, -4), (-4, 8, -4), (-5, 9, -4), #E
-                           (5, 0, -5), (4, 1, -5), (3, 2, -5), (2, 3, -5), (1, 4, -5), (0, 5, -5), (-1, 6, -5), (-2, 7, -5), (-3, 8, -5), (-4, 9, -5), #F
-                           (5, 1, -6), (4, 2, -6), (3, 3, -6), (2, 4, -6), (1, 5, -6), (0, 6, -6), (-1, 7, -6), (-2, 8, -6), (-3, 9, -6), #G
-                           (5, 2, -7), (4, 3, -7), (3, 4, -7), (2, 5, -7), (1, 6, -7), (0, 7, -7), (-1, 8, -7), (-2, 9, -7), #H
-                           (5, 3, -8), (4, 4, -8), (3, 5, -8), (2, 6, -8), (1, 7, -8), (0, 8, -8), (-1, 9, -8), #I
-                           (5, 4, -9), (4, 5, -9), (3, 6, -9), (2, 7, -9), (1, 8, -9), (0, 9, -9)} #J
+        self.all_coords = {
+            (0, 0, 0), (-1, 1, 0), (-2, 2, 0), (-3, 3, 0), (-4, 4, 0), (-5, 5, 0), #A
+            (1, 0, -1), (0, 1, -1), (-1, 2, -1), (-2, 3, -1), (-3, 4, -1), (-4, 5, -1), (-5, 6, -1), #B
+            (2, 0, -2), (1, 1, -2), (0, 2, -2), (-1, 3, -2), (-2, 4, -2), (-3, 5, -2), (-4, 6, -2), (-5, 7, -2), #C
+            (3, 0, -3), (2, 1, -3), (1, 2, -3), (0, 3, -3), (-1, 4, -3), (-2, 5, -3), (-3, 6, -3), (-4, 7, -3), (-5, 8, -3), #D
+            (4, 0, -4), (3, 1, -4), (2, 2, -4), (1, 3, -4), (0, 4, -4), (-1, 5, -4), (-2, 6, -4), (-3, 7, -4), (-4, 8, -4), (-5, 9, -4), #E
+            (5, 0, -5), (4, 1, -5), (3, 2, -5), (2, 3, -5), (1, 4, -5), (0, 5, -5), (-1, 6, -5), (-2, 7, -5), (-3, 8, -5), (-4, 9, -5), #F
+            (5, 1, -6), (4, 2, -6), (3, 3, -6), (2, 4, -6), (1, 5, -6), (0, 6, -6), (-1, 7, -6), (-2, 8, -6), (-3, 9, -6), #G
+            (5, 2, -7), (4, 3, -7), (3, 4, -7), (2, 5, -7), (1, 6, -7), (0, 7, -7), (-1, 8, -7), (-2, 9, -7), #H
+            (5, 3, -8), (4, 4, -8), (3, 5, -8), (2, 6, -8), (1, 7, -8), (0, 8, -8), (-1, 9, -8), #I
+            (5, 4, -9), (4, 5, -9), (3, 6, -9), (2, 7, -9), (1, 8, -9), (0, 9, -9)} #J
 
         self.open_coord = self.all_coords.copy()
         self.occupied_dict = {coord : "free" for coord in self.all_coords}
@@ -56,9 +57,7 @@ class BokuGame:
             # get the positions in each axis
             for i in range(-4,5):
                 line_coord = (coord[0] + vect[0]*i, coord[1] + vect[1]*i, coord[2] + vect[2]*i)
-                #print(f"found at ({vect}, {i}){self.coord_to_notation(line_coord)}")
                 if line_coord in self.occupied_dict:
-                    #print(f"added {self.coord_to_notation(line_coord)} to line_coords and value_dict")
                     line_coords.append(line_coord)
                     value_dict[line_coord] = 0
 
@@ -86,8 +85,56 @@ class BokuGame:
 
         return win, value_dict
 
-    def capture_check(self, coord):
-        pass
+    def capture_check(self, coord: tuple, capture_color: str):
+        """this function checks for a win and also returns the value of every tile on the axi,
+        this value is the contribution that this tile, if placed, contributes to a win on """
+
+        capture_pattern = []
+        if capture_color == "white":
+            capture_pattern = ["white", "balck", "black", "white"]
+        else:
+            capture_pattern = ["black", "white", "white", "black"]
+
+        value_dict = {}
+        capture_choice = []
+
+        # get the three axi
+        for vect in self.neibghbour_vectors[0:3]:
+            line_coords = []
+            # get the positions in each axis
+            for i in range(-4,5):
+                line_coord = (coord[0] + vect[0]*i, coord[1] + vect[1]*i, coord[2] + vect[2]*i)
+
+                # check that the tile is on the board
+                if line_coord in self.occupied_dict:
+                    # add the coordinate
+                    line_coords.append(line_coord)
+                    value_dict[line_coord] = 0
+
+            # for every sub_line in a line
+            for s_l in range(len(line_coords) - 3):
+                sub_line_addition = 0
+
+                # every tile n in a sub_line
+                for i, t_n in enumerate(range(4)):
+
+                    # break if the tile does not match the pattern
+                    if self.occupied_dict[line_coord[s_l + t_n]] == capture_pattern[i]:
+                        sub_line_addition += 1
+                    else:
+                        break
+
+                # check if a capture is available next turn
+                if sum(sub_line_addition) == 3:
+                    value_dict[line_coords[s_l + 3]] = 1
+
+                # check if a capture hasoccured
+                if sum(sub_line_addition) == 4:
+                    # add the second and third tiles as capturable
+                    capture_choice.append(line_coords[s_l + 1])
+                    capture_choice.append(line_coords[s_l + 2])
+
+        return capture_choice, value_dict
 
     def place_tile(self, coord, tile_color, write_history=True):
         """places a tile, and then calls win check and capture check"""
@@ -115,7 +162,7 @@ class BokuGame:
 
         # move the tile from occupied to open and write history
         del self.occupied_dict[tile]
-        self.open_coord.add(tile) 
+        self.open_coord.add(tile)
         if write_history:
             # add the removed tile on the last turn's entry
             self.history[-1].append(tile)
@@ -179,7 +226,7 @@ class BokuGame:
                 tile = action[0]
 
             # remove the tile played using capture without writing to history
-            # wriet_history=False also disables the tile lock 
+            # wriet_history=False also disables the tile lock
             self.capture_tile(tile, False)
 
         return action

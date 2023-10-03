@@ -13,12 +13,10 @@ while True:
     result = game.place_tile(user_tile, user_player)
     print(not result)
 
-    for color in ["white" , "black"]:
+    for color in ["white"]:
         print(f"capture heuristic for {color}")
         capture_choice, values = game.capture_check(user_tile, color)
-        if capture_choice:
-            print(capture_choice)
-            break
+        print(f"capture_choice: {[game.coord_to_notation(x) for x in capture_choice]}")
 
         for key, value in values.items():
             print(f"{game.coord_to_notation(key)} : {value}")

@@ -42,11 +42,10 @@ class BokuGame:
                                                   'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 
                                                         'J5', 'J6', 'J7', 'J8', 'J9', 'J10'}
 
-    def win_check(self, coord):
+    def win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
-        win_color = self.occupied_dict[coord]
         opp_color = "white" if win_color == "black" else "black"
 
         value_dict = {}
@@ -100,8 +99,6 @@ class BokuGame:
 
         # get the three axi
         for vect in self.neibghbour_vectors:
-            print(f"the pattern is {capture_pattern}")
-            print(f"the vector is {vect}")
             line_coords = []
             # get the positions in each axis
             for i in range(-3,4):
@@ -116,22 +113,15 @@ class BokuGame:
             # for every sub_line in a line
             for s_l in range(len(line_coords) - 3):
                 pattern_match_count = 0
-                print(f"sub_line starting at {self.coord_to_notation(line_coords[s_l])}")
+
                 # every tile n in a sub_line
                 for i, t_n in enumerate(range(4)):
-                    print(f"evaluating {self.coord_to_notation(line_coords[s_l + t_n])}")
-                    print(f"this tile is {self.occupied_dict[line_coords[s_l + t_n]]}")
-                    print(f"the tile should be {capture_pattern[i].upper()}")
-                    print(f"this is the potential {i + 1}th tile in the pattern")
 
                     # break if the tile does not match the pattern
                     if self.occupied_dict[line_coords[s_l + t_n]] == capture_pattern[i]:
                         pattern_match_count += 1
                     else:
-                        print("the pattern was broken")
-                        print()
                         break
-                    print()
 
                 # check if a capture is available next turn
                 if pattern_match_count == 3:
@@ -142,7 +132,6 @@ class BokuGame:
                     # add the second and third tiles as capturable
                     capture_choice.add(line_coords[s_l + 1])
                     capture_choice.add(line_coords[s_l + 2])
-            print()
 
         return capture_choice, value_dict
 
@@ -171,7 +160,7 @@ class BokuGame:
         """captes the tile it recieved in paramaters and locks that tile"""
 
         # move the tile from occupied to open and write history
-        del self.occupied_dict[tile]
+        self.occupied_dict[tile] = "free"
         self.open_coord.add(tile)
         if write_history:
             # add the removed tile on the last turn's entry

@@ -39,16 +39,18 @@ def start_game():
             print(f"the tile '{tile_notation}' does not exist")
             continue
 
-        win, capture_choice, illegal_move = game.place_tile(tile_coord, player)
+        illegal_move = game.place_tile(tile_coord, player)
 
         if illegal_move:
             print(f"move '{tile_notation}' is not allowed")
 
+        win, _ = game.win_check(tile_coord, player)
         if win:
             print(f"{player} has won the game!")
             game_on = False
             break
 
+        capture_choice, _ = game.capture_check(tile_coord, player)
         if capture_choice:
             illegal_capture = True
             while illegal_capture:

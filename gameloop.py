@@ -3,6 +3,7 @@ from bokulogic import BokuGame
 
 def start_game():
     """This methods starts a game of boku"""
+    # initialize game
     game_on = True
     game = BokuGame()
 

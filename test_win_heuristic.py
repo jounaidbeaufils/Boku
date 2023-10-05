@@ -13,7 +13,7 @@ while True:
     result = game.place_tile(user_tile, user_player)
     print(not result)
 
-    win, values = game.win_check(user_tile)
+    win, values = game.win_check(user_tile, user_player)
     if win:
         print("player win!")
         break

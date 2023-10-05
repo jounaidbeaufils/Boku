@@ -124,7 +124,7 @@ class BokuGame:
                         break
 
                 # check if a capture is available next turn
-                if pattern_match_count == 3:
+                if pattern_match_count == 3: #TODO silent error
                     value_dict[line_coords[s_l + 3]] = 1
 
                 # check if a capture hasoccured

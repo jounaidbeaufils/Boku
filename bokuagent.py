@@ -1,6 +1,7 @@
 """Module for all Boku agents."""
 from abc import ABC, abstractmethod
 from bokulogic import BokuGame
+from random import randint
 
 class BokuAgent(ABC):
     """Abstract base class for all Boku agents."""
@@ -16,6 +17,27 @@ class BokuAgent(ABC):
         player = "white" if len(game.history) % 2 == 0 else "black"
         turn = len(game.history) // 2
         return turn, player
+
+class RandomAgent(BokuAgent):
+    """Agent plays random player."""
+    def play(self, game: BokuGame):
+        """Play a move."""
+        # get all valid moves
+        valid_moves = [move for move in game.occupied_dict if game.occupied_dict[move] == "free" and move != game.no_play_tile]
+
+        # choose a random move
+        move_index = randint(0, len(valid_moves) - 1)
+
+        # play the move
+        game.place_tile(valid_moves[move_index], self.color)
+        print(f"{self.color} RandomAgent plays {game.coord_to_notation(valid_moves[move_index])}")
+
+        # capture if possible
+        capture_choice, _ = game.capture_check(valid_moves[move_index], self.color)
+        if capture_choice:
+            capture_index = randint(0, len(capture_choice) - 1)
+            game.capture_tile(capture_choice[capture_index])
+
 
 class HumanAgent(BokuAgent):
     """Class for human players."""

@@ -1,5 +1,5 @@
 """Module for all Boku agents."""
-from random import randint
+from random import randint, choice
 
 from abc import ABC, abstractmethod
 from bokulogic import BokuGame
@@ -37,8 +37,7 @@ class RandomAgent(BokuAgent):
         # capture if possible
         capture_choice, _ = game.capture_check(move, self.color)
         if capture_choice:
-            capture_index = randint(0, len(capture_choice) - 1)
-            game.capture_tile(capture_choice[capture_index])
+            game.capture_tile(choice(capture_choice))
 
         return move
 
@@ -81,5 +80,5 @@ class HumanAgent(BokuAgent):
                     if capture in capture_choice:
                         illegal_capture =False
                         game.capture_tile(capture)
-                        
+
         return tile_coord

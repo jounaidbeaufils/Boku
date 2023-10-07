@@ -1,7 +1,8 @@
 """Module for all Boku agents."""
+from random import randint
+
 from abc import ABC, abstractmethod
 from bokulogic import BokuGame
-from random import randint
 
 class BokuAgent(ABC):
     """Abstract base class for all Boku agents."""
@@ -9,7 +10,7 @@ class BokuAgent(ABC):
         self.color = color
 
     @abstractmethod
-    def play(self, game: BokuGame):
+    def play(self, game: BokuGame) -> tuple():
         """Play a move."""
 
     def turn_to_play(self, game: BokuGame):
@@ -27,16 +28,19 @@ class RandomAgent(BokuAgent):
 
         # choose a random move
         move_index = randint(0, len(valid_moves) - 1)
+        move = valid_moves[move_index]
 
         # play the move
-        game.place_tile(valid_moves[move_index], self.color)
-        print(f"{self.color} RandomAgent plays {game.coord_to_notation(valid_moves[move_index])}")
+        game.place_tile(move, self.color)
+        print(f"{self.color} RandomAgent plays {game.coord_to_notation(move)}")
 
         # capture if possible
-        capture_choice, _ = game.capture_check(valid_moves[move_index], self.color)
+        capture_choice, _ = game.capture_check(move, self.color)
         if capture_choice:
             capture_index = randint(0, len(capture_choice) - 1)
             game.capture_tile(capture_choice[capture_index])
+
+        return move
 
 
 class HumanAgent(BokuAgent):
@@ -44,14 +48,10 @@ class HumanAgent(BokuAgent):
     def play(self, game: BokuGame):
         """Play a move by asking the user for input."""
         valid_play = False
+        tile_coord = tuple()
         while(not valid_play):
             # input tile
-            tile_notation = input(f" which tile does {self.color.upper()} place? ")
-
-            # check for commands and run them
-            if tile_notation != "" and tile_notation[0] == "\\":
-                self.run_command(tile_notation[1:], game)
-                continue
+            tile_notation = input(f"which tile does {self.color.upper()} place? ")
 
             # translate notation
             tile_coord = game.notation_to_coord(tile_notation)
@@ -69,42 +69,17 @@ class HumanAgent(BokuAgent):
                 continue
             else:
                 valid_play = True
-            
-            # check for win
-            win, _ = game.win_check(tile_coord, self.color)
-            if win:
-                print(f"{self.color} has won the game!")
-            
+
             # check for captures
             capture_choice, _ = game.capture_check(tile_coord, self.color)
             if capture_choice:
                 illegal_capture = True
                 while illegal_capture:
                     notation_list = [game.coord_to_notation(coord) for coord in capture_choice]
-                    capture = input(f"which tile does {self.color} capture from the following list {notation_list}? ")
+                    capture = input(f"which tile does {self.color.upper()} capture from the following list {notation_list}? ")
                     capture = game.notation_to_coord(capture)
                     if capture in capture_choice:
                         illegal_capture =False
                         game.capture_tile(capture)
-              
-    def run_command(self, command: str, game: BokuGame):
-        """this fuction is used to execute commands while the game loop is rnning"""
-        command_dict = {
-            "undo" : game.undo,
-            "display" : game.draw_board,
-            # i don't want to declare a wrapper function
-            # this list comprehension converts from coordinates to notation
-            "history" : lambda: print([[game.coord_to_notation(coord) for coord in action] for action in game.history]),
-            "occupied": lambda: print(game.occupied_dict)
-        }
-        if command not in command_dict:
-            print(f"command '\\{command}' is not a valid command")
-
-        else:
-            # run command
-            data = command_dict[command]()
-
-            # print command data
-            print_list = []
-            if command in print_list:
-                print(data)
+                        
+        return tile_coord

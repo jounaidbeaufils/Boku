@@ -37,7 +37,9 @@ class RandomAgent(BokuAgent):
         # capture if possible
         capture_choice, _ = game.capture_check(move, self.color)
         if capture_choice:
-            game.capture_tile(choice(capture_choice))
+            capture = choice(list(capture_choice))
+            game.capture_tile(capture)
+            print(f"{self.color} RandomAgent captures {game.coord_to_notation(capture)}")
 
         return move
 

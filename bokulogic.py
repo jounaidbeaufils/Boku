@@ -31,7 +31,7 @@ class BokuGame:
                                    (1,-1,0), #se
                                    (-1,0,1)] #sw
 
-        self.valid_notation =  {'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 
+        self.valid_notation =  {'A1', 'A2', 'A3', 'A4', 'A5', 'A6',
                                 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 
                                 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 
                                 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 
@@ -41,7 +41,25 @@ class BokuGame:
                                             'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 
                                                   'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 
                                                         'J5', 'J6', 'J7', 'J8', 'J9', 'J10'}
-
+        
+        self.centricity_values = {
+            (-3, 4, -1): 22, (2, 1, -3): 22, (2, 2, -4): 25, (-2, 8, -6): 22, (-4, 5, -1): 21, (-2, 9, -7): 19, (-3, 8, -5): 22,
+            (0, 2, -2): 24, (1, 0, -1): 19, (-2, 6, -4): 27, (-2, 7, -5): 25, (1, 5, -6): 28, (1, 6, -7): 25, (-4, 9, -5): 19,
+            (4, 2, -6): 21, (-3, 6, -3): 24, (-3, 7, -4): 24, (2, 6, -8): 22, (2, 7, -9): 19, (0, 9, -9): 18, (1, 3, -4): 28,
+            (1, 4, -5): 30, (-4, 7, -3): 21, (-3, 5, -2): 24, (4, 1, -5): 21, (-1, 2, -1): 22, (-5, 7, -2): 18, (0, 0, 0): 18,
+            (5, 4, -9): 18, (0, 7, -7): 24, (-1, 6, -5): 28, (4, 0, -4): 19, (-5, 5, 0): 18, (5, 2, -7): 18, (-5, 6, -1): 18,
+            (-1, 5, -4): 30, (5, 1, -6): 18, (0, 4, -4): 30, (0, 5, -5): 30, (1, 7, -8): 22, (4, 4, -8): 21, (-2, 3, -1): 22,
+            (-1, 3, -2): 25, (-1, 4, -3): 28, (-3, 9, -6): 19, (4, 5, -9): 19, (5, 0, -5): 18, (0, 3, -3): 27, (3, 1, -4): 22,
+            (3, 2, -5): 24, (4, 3, -7): 21, (-5, 9, -4): 18, (3, 0, -3): 19, (2, 0, -2): 19, (-4, 8, -4): 21, (-1, 1, 0): 19,
+            (-5, 8, -3): 18, (-1, 8, -7): 22, (-1, 9, -8): 19, (0, 8, -8): 21, (3, 6, -9): 19, (-4, 6, -2): 21, (-2, 5, -3): 27,
+            (-1, 7, -6): 25, (5, 3, -8): 18, (0, 6, -6): 27, (3, 5, -8): 22, (0, 1, -1): 21, (2, 5, -7): 25, (-2, 4, -2): 25,
+            (1, 2, -3): 25, (3, 3, -6): 24, (-3, 3, 0): 19, (3, 4, -7): 24, (2, 3, -5): 27, (1, 8, -9): 19, (2, 4, -6): 27,
+            (-2, 2, 0): 19, (1, 1, -2): 22, (-4, 4, 0): 19}
+        
+        self.heuristic = {"win" : {coord : 0 for coord in self.all_coords},
+                    "capture" : {coord : 0 for coord in self.all_coords},
+                    "centricity" : {coord : 0 for coord in self.all_coords}}
+        
     def win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
@@ -81,6 +99,9 @@ class BokuGame:
                 if sum(sub_line_addition) > 0:
                     for t_n, value in enumerate(sub_line_addition):
                         value_dict[line_coords[s_l + t_n]] += value / counter
+
+        for d_coord, d_value in value_dict:
+            self.heuristic["win"][d_coord] += value_dict[d_value] # TODO: override or add?
 
         return win, value_dict
 
@@ -132,6 +153,9 @@ class BokuGame:
                     # add the second and third tiles as capturable
                     capture_choice.add(line_coords[s_l + 1])
                     capture_choice.add(line_coords[s_l + 2])
+
+        for d_coord, d_value in value_dict:
+            self.heuristic["capture"][d_coord] += value_dict[d_value] # TODO: override or add?
 
         return capture_choice, value_dict
 

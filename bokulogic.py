@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
 
-class BokuGame:
+class BokuGame: #TODO refactor the dictionarys into a seperate data class
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
     def __init__(self):
@@ -145,7 +145,7 @@ class BokuGame:
                         break
 
                 # check if a capture is available next turn
-                if pattern_match_count == 3: #TODO silent error
+                if pattern_match_count == 3:
                     value_dict[line_coords[s_l + 3]] = 1
 
                 # check if a capture hasoccured
@@ -155,7 +155,7 @@ class BokuGame:
                     capture_choice.add(line_coords[s_l + 2])
 
         for d_coord, d_value in value_dict:
-            self.heuristic["capture"][d_coord] += value_dict[d_value] # TODO: override or add?
+            self.heuristic["capture"][d_coord] += value_dict[d_value] #TODO: override or add?
 
         return capture_choice, value_dict
 

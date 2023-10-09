@@ -9,7 +9,7 @@ def start_game():
     game = BokuGame()
 
     # set promt cycle
-    promt_cycle = int(input("how many turns between prompts (1 or more)? "))
+    promt_cycle = int(input("how many turns between prompts (1 or more)? "))#TODO at first command on human turn, new module?
 
     players = [get_player_agent("white"), get_player_agent("black")]
 

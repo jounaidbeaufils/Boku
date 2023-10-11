@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
 
+import bokudata
+
 class BokuGame: #TODO refactor the dictionarys into a seperate data class
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
@@ -20,7 +22,7 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
             (5, 4, -9), (4, 5, -9), (3, 6, -9), (2, 7, -9), (1, 8, -9), (0, 9, -9)} #J
 
         self.open_coord = self.all_coords.copy()
-        self.occupied_dict = {coord : "free" for coord in self.all_coords}
+        self.occupied_dict = {coord : "free" for coord in bokudata.all_coords}
         self.no_play_tile = tuple()
         self.history = []
 
@@ -56,9 +58,10 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
             (1, 2, -3): 25, (3, 3, -6): 24, (-3, 3, 0): 19, (3, 4, -7): 24, (2, 3, -5): 27, (1, 8, -9): 19, (2, 4, -6): 27,
             (-2, 2, 0): 19, (1, 1, -2): 22, (-4, 4, 0): 19}
         
-        self.heuristic = {"win" : {coord : 0 for coord in self.all_coords},
-                    "capture" : {coord : 0 for coord in self.all_coords},
-                    "centricity" : {coord : 0 for coord in self.all_coords}}
+        self.heuristic = {
+            "win" : {coord : 0 for coord in bokudata.all_coords},
+            "capture" : {coord : 0 for coord in bokudata.all_coords},
+            "centricity" : bokudata.centricity_values}
         
     def win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
@@ -100,8 +103,8 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                     for t_n, value in enumerate(sub_line_addition):
                         value_dict[line_coords[s_l + t_n]] += value / counter
 
-        for d_coord, d_value in value_dict:
-            self.heuristic["win"][d_coord] += value_dict[d_value] # TODO: override or add?
+        for d_coord, d_value in value_dict.items():
+            self.heuristic["win"][d_coord] = d_value #TODO: override or add?
 
         return win, value_dict
 
@@ -147,6 +150,9 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                 # check if a capture is available next turn
                 if pattern_match_count == 3:
                     value_dict[line_coords[s_l + 3]] = 1
+                    value_dict[line_coords[s_l + 2]] = 0
+                    value_dict[line_coords[s_l + 1]] = 0
+                    value_dict[line_coords[s_l + 0]] = 0
 
                 # check if a capture hasoccured
                 if pattern_match_count == 4:
@@ -154,8 +160,15 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                     capture_choice.add(line_coords[s_l + 1])
                     capture_choice.add(line_coords[s_l + 2])
 
-        for d_coord, d_value in value_dict:
-            self.heuristic["capture"][d_coord] += value_dict[d_value] #TODO: override or add?
+                    # set all 4 tiles to 0
+                    value_dict[line_coords[s_l + 3]] = 0
+                    value_dict[line_coords[s_l + 2]] = 0
+                    value_dict[line_coords[s_l + 1]] = 0
+                    value_dict[line_coords[s_l + 0]] = 0
+
+
+        for d_coord, d_value in value_dict.items():
+            self.heuristic["capture"][d_coord] += d_value #TODO: override or add?
 
         return capture_choice, value_dict
 
@@ -192,6 +205,14 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
 
             # block the tile for the next play
             self.no_play_tile = tile
+
+            # check for captures after a capture, to update the heuristic
+            self.capture_check(tile, "white")
+            self.capture_check(tile, "black")
+
+            # check for wins after a capture, to update the heuristic
+            self.win_check(tile, "white")
+            self.win_check(tile, "black")
 
     def draw_board(self):
         """draw the board"""

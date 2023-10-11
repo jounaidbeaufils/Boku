@@ -36,6 +36,7 @@ def start_game():
         if win:
             print(f"{player.color} has won the game!")
             game_on = False
+            run_command("display", game)
 
         if (turn + 1) % promt_cycle == 0 and player.color == "black":
             command = "start"
@@ -56,10 +57,12 @@ def run_command(command: str, game: BokuGame):
         # i don't want to declare a wrapper function
         # this list comprehension converts from coordinates to notation
         "history" : lambda: print([[game.coord_to_notation(coord) for coord in action] for action in game.history]),
-        "occupied": lambda: print(game.occupied_dict)
+        "occupied": lambda: print(game.occupied_dict),
+        "heuristic" : lambda: print([(game.coord_to_notation(coord), value) for coord, value in game.heuristic["win"].items()]),
+        "capture heuristic" : lambda: print([(game.coord_to_notation(coord), value) for coord, value in game.heuristic["capture"].items()]),
     }
     if command not in command_dict:
-        print(f"command '\\{command}' is not a valid command")
+        print(f"command '{command}' is not a valid command")
 
     else:
         # run command

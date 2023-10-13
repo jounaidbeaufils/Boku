@@ -32,7 +32,7 @@ def start_game():
         player = players[len(game.history) % 2]
         move = player.play(game)
 
-        # TODO update how wins are checked
+        # TODO  update how wins are checked
         win, _ = game.win_check(move, player.color)
         if win:
             print(f"{player.color} has won the game!")

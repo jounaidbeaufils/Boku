@@ -70,7 +70,7 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
 
         return win, value_dict
 
-    def capture_check(self, coord: tuple, capture_color: str, recursive: bool=True): # TODO access the common heuristic directly, and clean it before overwriting
+    def capture_check(self, coord: tuple, capture_color: str): # TODO access the common heuristic directly, and clean it before overwriting
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
@@ -118,12 +118,6 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                     # add the second and third tiles as capturable
                     capture_choice.add(line_coords[s_l + 1])
                     capture_choice.add(line_coords[s_l + 2])
-
-                # run a capture check for the other color, to update the heuristic
-                # ignore the capture as it it not the opponents turn
-                if recursive:
-                    opp_color = "white" if capture_color == "black" else "black"
-                    self.capture_check(line_coords[s_l + 3], opp_color, recursive=False)
 
         for d_coord, d_value in value_dict.items():
             self.heuristic["capture"][d_coord] = d_value #TODO: override or add?

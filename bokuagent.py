@@ -4,7 +4,8 @@ from random import randint, choice
 from abc import ABC, abstractmethod
 from bokulogic import BokuGame
 
-class BokuAgent(ABC):
+@abstractmethod
+class BokuAgent(ABC): # TODO update agents to use heuristics properly
     """Abstract base class for all Boku agents."""
     def __init__(self, color: str):
         self.color = color

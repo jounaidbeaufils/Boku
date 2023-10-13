@@ -170,6 +170,28 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
             self.win_check(tile, "white")
             self.win_check(tile, "black")
 
+    def heuristic_check(self, coord, color):
+        """runs all required heuristics that should be played when a move is played"""
+        # set opposition color
+        opp_color = "white" if color == "black" else "black"
+
+        # check for wins after a capture, to update the heuristic
+        color_win  = self.win_check(coord, color)
+
+        # earlu exit out of heuristic when a game is won
+        if color_win:
+            return color_win, set()
+        self.win_check(coord, opp_color)
+
+        # check for captures after a capture, to update the heuristic
+        color_choice = self.capture_check(coord, color)
+        self.capture_check(coord, opp_color)
+
+        # return the board score
+        board_score = 0
+
+        return color_win, color_choice, board_score
+
     def draw_board(self):
         """draw the board"""
 

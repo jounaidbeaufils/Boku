@@ -63,7 +63,7 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
             "capture" : {coord : 0 for coord in bokudata.all_coords},
             "centricity" : bokudata.centricity_values}
         
-    def win_check(self, coord: tuple, win_color: str):
+    def win_check(self, coord: tuple, win_color: str): # TODO access the common heuristic directly, and clean it before overwriting
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
@@ -108,7 +108,7 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
 
         return win, value_dict
 
-    def capture_check(self, coord: tuple, capture_color: str):
+    def capture_check(self, coord: tuple, capture_color: str, recursive: bool=True): # TODO access the common heuristic directly, and clean it before overwriting
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
@@ -132,7 +132,7 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                 if line_coord in self.occupied_dict:
                     # add the coordinate
                     line_coords.append(line_coord)
-                    value_dict[line_coord] = 0
+                    #value_dict[line_coord] = 0
 
             # for every sub_line in a line
             for s_l in range(len(line_coords) - 3):
@@ -150,9 +150,6 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                 # check if a capture is available next turn
                 if pattern_match_count == 3:
                     value_dict[line_coords[s_l + 3]] = 1
-                    value_dict[line_coords[s_l + 2]] = 0
-                    value_dict[line_coords[s_l + 1]] = 0
-                    value_dict[line_coords[s_l + 0]] = 0
 
                 # check if a capture hasoccured
                 if pattern_match_count == 4:
@@ -160,15 +157,14 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                     capture_choice.add(line_coords[s_l + 1])
                     capture_choice.add(line_coords[s_l + 2])
 
-                    # set all 4 tiles to 0
-                    value_dict[line_coords[s_l + 3]] = 0
-                    value_dict[line_coords[s_l + 2]] = 0
-                    value_dict[line_coords[s_l + 1]] = 0
-                    value_dict[line_coords[s_l + 0]] = 0
-
+                # run a capture check for the other color, to update the heuristic
+                # ignore the capture as it it not the opponents turn
+                if recursive:
+                    opp_color = "white" if capture_color == "black" else "black"
+                    self.capture_check(line_coords[s_l + 3], opp_color, recursive=False)
 
         for d_coord, d_value in value_dict.items():
-            self.heuristic["capture"][d_coord] += d_value #TODO: override or add?
+            self.heuristic["capture"][d_coord] = d_value #TODO: override or add?
 
         return capture_choice, value_dict
 

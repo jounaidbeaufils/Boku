@@ -110,7 +110,7 @@ class BokuGame:
                 if pattern_match_count == 3:
                     value_dict[line_coords[s_l + 3]] = 1
 
-                # check if a capture hasoccured
+                # check if a capture has occured
                 if pattern_match_count == 4:
                     # add the second and third tiles as capturable
                     capture_choice.add(line_coords[s_l + 1])

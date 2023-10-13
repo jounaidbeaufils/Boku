@@ -9,7 +9,6 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
     def __init__(self):
-        self.open_coord = bokudata.all_coords.copy()
         self.occupied_dict = {coord : "free" for coord in bokudata.all_coords}
         self.no_play_tile = tuple()
         self.history = []
@@ -145,7 +144,6 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
             self.no_play_tile = tuple() #reset; tile is only blocked for one play
 
             # move tile from open to occupied and write history
-            self.open_coord.remove(coord)
             self.occupied_dict[coord] = tile_color
             if write_history:
                 self.history.append([coord])
@@ -157,7 +155,6 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
 
         # move the tile from occupied to open and write history
         self.occupied_dict[tile] = "free"
-        self.open_coord.add(tile)
         if write_history:
             # add the removed tile on the last turn's entry
             self.history[-1].append(tile)

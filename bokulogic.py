@@ -2,10 +2,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
+from collections import defaultdict
 
 import bokudata
 
-class BokuGame: #TODO refactor the dictionarys into a seperate data class
+class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
     def __init__(self):
@@ -21,17 +22,17 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                                    (-1,0,1)] #sw
         
         self.heuristic = {
-            "win" : {coord : 0 for coord in bokudata.all_coords},
-            "capture" : {coord : 0 for coord in bokudata.all_coords},
+            "win" : {},
+            "capture" : {},
             "centricity" : bokudata.centricity_values}
         
-    def win_check(self, coord: tuple, win_color: str): # TODO access the common heuristic directly, and clean it before overwriting
+    def win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
         opp_color = "white" if win_color == "black" else "black"
 
-        value_dict = {}
+        value_dict = defaultdict()
         win = False
         # get the three axi
         for vect in self.neibghbour_vectors[0:3]:
@@ -41,7 +42,6 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                 line_coord = (coord[0] + vect[0]*i, coord[1] + vect[1]*i, coord[2] + vect[2]*i)
                 if line_coord in self.occupied_dict:
                     line_coords.append(line_coord)
-                    value_dict[line_coord] = 0
 
             # for every sub_line in a line
             for s_l in range(len(line_coords) - 4):
@@ -59,18 +59,15 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
 
                 if sum(sub_line_addition) == 0:
                     win = True
-                    return win, value_dict
+                    return win, {}
 
                 if sum(sub_line_addition) > 0:
                     for t_n, value in enumerate(sub_line_addition):
                         value_dict[line_coords[s_l + t_n]] += value / counter
 
-        for d_coord, d_value in value_dict.items():
-            self.heuristic["win"][d_coord] = d_value #TODO: override or add?
-
         return win, value_dict
 
-    def capture_check(self, coord: tuple, capture_color: str): # TODO access the common heuristic directly, and clean it before overwriting
+    def capture_check(self, coord: tuple, capture_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
@@ -118,9 +115,6 @@ class BokuGame: #TODO refactor the dictionarys into a seperate data class
                     # add the second and third tiles as capturable
                     capture_choice.add(line_coords[s_l + 1])
                     capture_choice.add(line_coords[s_l + 2])
-
-        for d_coord, d_value in value_dict.items():
-            self.heuristic["capture"][d_coord] = d_value #TODO: override or add?
 
         return capture_choice, value_dict
 

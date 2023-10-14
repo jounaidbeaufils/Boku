@@ -59,9 +59,11 @@ class MappedQueue(object):
        Pearson Education.
     """
 
-    def __init__(self, data=[]):
+    def __init__(self, data=None):
         """Priority queue class with updatable priorities.
         """
+        if data is None:
+            data = []
         self.h = list(data)
         self.d = dict()
         self._heapify()
@@ -125,9 +127,9 @@ class MappedQueue(object):
         try:
             pos = self.d[elt]
             del self.d[elt]
-        except KeyError:
+        except KeyError as e:
             # Not in queue
-            raise
+            raise ValueError(f"Element ({elt}) not in queue") from e
         # If elt is last item, remove and return
         if pos == len(self.h) - 1:
             self.h.pop()

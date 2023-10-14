@@ -193,3 +193,65 @@ class MappedQueue(object):
                 # Invariant is satisfied
                 break
         return pos
+
+class MappedQueueWithUndo(MappedQueue):
+    """A MappedQueue with undo functionality. 
+       This is my personal addition for the purpose of the boku assignment.
+    """
+    def __init__(self, data=None):
+        if data is None:
+            data = []
+        super().__init__(data)
+        self._history = []
+
+    def push(self, elt):
+        """Add an element to the queue."""
+        result = super().push(elt)
+        if result:  # Only add to history if the element was actually added
+            self._history.append(('remove', elt))
+        return result
+
+    def pop(self):
+        """Remove and return the smallest element in the queue."""
+        elt = super().pop()
+        self._history.append(('push', elt))
+        return elt
+
+    def update(self, elt, new):
+        """Replace an element in the queue with a new one."""
+        # Before updating, store the original value in history
+        self._history.append(('update', new, elt))
+        super().update(elt, new)
+
+    def remove(self, elt):
+        """Remove an element from the queue."""
+        # Store the removed element for undo purposes
+        self._history.append(('push', elt))
+        super().remove(elt)
+
+    def undo(self):
+        """Undo the last operation."""
+        if not self._history:
+            print("MappedQueueWithUndo had no history to undo.")
+            return
+        
+        action, *args = self._history.pop()
+        # Call the inverse function without recording to history
+        if action == 'push':
+            self._silent_push(*args)
+        elif action == 'remove':
+            self._silent_remove(*args)
+        elif action == 'update':
+            self._silent_update(*args)
+
+    def _silent_push(self, elt):
+        """Push without recording to history."""
+        super().push(elt)
+
+    def _silent_remove(self, elt):
+        """Remove without recording to history."""
+        super().remove(elt)
+
+    def _silent_update(self, elt, new):
+        """Update without recording to history."""
+        super().update(elt, new)

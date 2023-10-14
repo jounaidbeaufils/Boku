@@ -2,7 +2,7 @@
 from random import randint, choice
 
 from abc import ABC, abstractmethod
-from bokulogic import BokuGame
+from bokuboard.bokulogic import BokuGame
 
 @abstractmethod
 class BokuAgent(ABC): # TODO update agents to use heuristics properly

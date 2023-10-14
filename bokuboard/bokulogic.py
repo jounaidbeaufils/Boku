@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
 from collections import defaultdict
 
-import bokudata
+from . import bokudata # relative path need to be used when importing from the same package
 
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
@@ -32,7 +32,7 @@ class BokuGame:
 
         opp_color = "white" if win_color == "black" else "black"
 
-        value_dict = defaultdict()
+        value_dict = defaultdict(int)
         win = False
         # get the three axi
         for vect in self.neibghbour_vectors[0:3]:

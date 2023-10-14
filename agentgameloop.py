@@ -1,5 +1,5 @@
 """This module is used to run a human vs human game of boku"""
-from bokulogic import BokuGame
+from bokuboard.bokulogic import BokuGame
 from bokuagent import BokuAgent, RandomAgent, HumanAgent
 
 def start_game():

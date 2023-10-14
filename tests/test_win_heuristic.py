@@ -1,3 +1,5 @@
+""" use "/usr/bin/python3 -m tests.test_win_heuristic" to run this file
+"""
 from bokulogic import BokuGame
 
 game = BokuGame()

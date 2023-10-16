@@ -27,7 +27,8 @@ def start_game():
         turn = len(game.history) // 2
         if last_turn != turn:
             last_turn = turn
-            print(f"\nturn {turn}")
+            game_balance = game.heuristic["white"].total() - game.heuristic["black"].total()
+            print(f"\nturn: {turn},  game balance: {round(game_balance, 3)} ")
 
         player = players[len(game.history) % 2]
         move = player.play(game)

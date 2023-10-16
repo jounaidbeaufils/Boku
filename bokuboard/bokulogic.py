@@ -181,7 +181,7 @@ class BokuGame:
 
         # check for win by the oppositit player
         # TODO improve heuristic accuracy with update order and potentially recursion
-        # _, opp_win_dict = self.win_check(coord, opp_color)
+        _, opp_win_dict = self.win_check(coord, opp_color)
 
         # check for captures after a capture, to update the heuristic
         color_choice, color_capture_dict = self.capture_check(coord, color)
@@ -189,7 +189,7 @@ class BokuGame:
 
         # update the heuristics
         self.heuristic_update(color_capture_dict, color_win_dict, color)
-        self.heuristic_update(opp_capture_dict, defaultdict(str), opp_color) # str on pupose as it will cause an error if the value is read
+        self.heuristic_update(opp_capture_dict, opp_win_dict, opp_color) # str on pupose as it will cause an error if the value is read
 
         # return the win state (false) and capture choices
         if can_capture:
@@ -204,7 +204,10 @@ class BokuGame:
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()
         for key, value in win_value_dict.items():
-            combined_value_dict[key] += value
+            if key not in combined_value_dict:
+                combined_value_dict[key] = value
+            else:    
+                combined_value_dict[key] += value
 
         # update the heuristics
         for key, value in combined_value_dict.items():

@@ -35,8 +35,9 @@ class RandomAgent(BokuAgent):
         game.place_tile(move, self.color)
         print(f"{self.color} RandomAgent plays {game.coord_to_notation(move)}")
 
-        # capture if possible
-        capture_choice, _ = game.capture_check(move, self.color)
+        # combined heuristic, win and capture check
+        _, capture_choice = game.heuristic_check(move, self.color, True)
+
         if capture_choice:
             capture = choice(list(capture_choice))
             game.capture_tile(capture)

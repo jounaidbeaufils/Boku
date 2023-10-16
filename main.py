@@ -1,6 +1,9 @@
 """This module is used to run a human vs human game of boku"""
+from random import choice
+
 from bokuboard.bokulogic import BokuGame
-from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent
+from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent, HeuristicAgent
+from bokuboard import bokudata
 
 def start_game():
     """This methods starts a game of boku"""
@@ -14,11 +17,12 @@ def start_game():
     players = [get_player_agent("white"), get_player_agent("black")]
 
     #starting board (for testing purposes)
-    for notation in []:
-        game.place_tile(game.notation_to_coord(notation), "white")
+    first_move = choice(list(bokudata.all_coords))
+    game.place_tile(first_move, "white")
 
-    for notation in []:
-        game.place_tile(game.notation_to_coord(notation), "black")
+    second_move = choice(list(bokudata.all_coords - {first_move}))
+    game.place_tile(second_move, "black")
+
 
     #Play the game
     last_turn = -1
@@ -29,6 +33,7 @@ def start_game():
             last_turn = turn
             game_balance = game.heuristic["white"].total() - game.heuristic["black"].total()
             print(f"\nturn: {turn},  game balance: {round(game_balance, 3)} ")
+            print(f"{len(game.heuristic['move order'])} moves in move order priority queue")
 
         player = players[len(game.history) % 2]
         move = player.play(game)
@@ -78,15 +83,20 @@ def run_command(command: str, game: BokuGame):
 def get_player_agent(color) -> BokuAgent:
     """This function asks the user if the player is an AI and returns the corresponding agent"""
 
-    is_ai = ""
-    agent = None
-    while is_ai not in  {"y", "n"}:
-        is_ai = input("is player an AI (y/n)? ")
+    agent_dict = {
+        "human" : HumanAgent,
+        "random" : RandomAgent,
+        "heuristic" : HeuristicAgent,
+    }
 
-    if is_ai == "y":
-        agent = RandomAgent(color)
-    else:
-        agent = HumanAgent(color)
+    agent_list = list(agent_dict.keys())
+
+    agent = None
+    agent_choice = ""
+
+    while agent_choice not in  agent_dict:
+        agent_choice = input(f"Available agents are: {str(agent_list)}. \nwhat agent is {color.upper()}? ")
+        agent = agent_dict[agent_choice](color)
 
     return agent
 

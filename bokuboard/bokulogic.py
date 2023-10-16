@@ -29,6 +29,9 @@ class BokuGame:
             "centricity" : bokudata.centricity_values_normalized,
             "white" : SumTrackingDict(),
             "black" : SumTrackingDict()}
+
+        for coord, value in bokudata.centricity_values.items():
+            self.heuristic["move order"].push(HeuristicTile(coord, value))
         
     def win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
@@ -122,7 +125,7 @@ class BokuGame:
 
         return capture_choice, value_dict
 
-    def place_tile(self, coord, tile_color, write_history=True):
+    def place_tile(self, coord, tile_color, write_history=True) -> bool:
         """places a tile, and then calls win check and capture check"""
 
         illegal = False
@@ -139,6 +142,9 @@ class BokuGame:
             self.occupied_dict[coord] = tile_color
             if write_history:
                 self.history.append([coord])
+                #print(f"removed {HeuristicTile(coord, 0)} from {self.heuristic['move order']}")
+                #print(f"{coord} is {self.coord_to_notation(coord)}")
+                #self.heuristic["move order"].remove(HeuristicTile(coord, 0))
 
         return illegal
 
@@ -221,13 +227,16 @@ class BokuGame:
             # add the centricity value to the capture value
             combined_value_dict[key] += self.heuristic["centricity"][key] * weights["centricity"]
 
+            # flip heuristic sign
+            combined_value_dict[key] *= -1
+
         # update the heuristics
         for key, value in combined_value_dict.items():
             # update the player whos turn it is
             self.heuristic[color][key] = value
 
             # update the move ordering peiority queue
-            self.heuristic["move order"].push(HeuristicTile(key, value))
+            self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value))
 
 
 
@@ -292,7 +301,8 @@ class BokuGame:
 
         return action
 
-    def notation_to_coord(self, notation: str):
+    @staticmethod
+    def notation_to_coord(notation: str):
         """will return (-99, -99, -99) if the notation is invalid"""
 
         coord = [-99, -99, -99]
@@ -307,7 +317,8 @@ class BokuGame:
 
         return tuple(coord)
 
-    def coord_to_notation(self, coord):
+    @staticmethod
+    def coord_to_notation(coord):
         """will return an empty string if the coord is not on the boord"""
 
         notation = ""

@@ -3,6 +3,8 @@ from random import randint, choice
 
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
+from priorityq.mapped_queue import MappedQueueWithUndo
+from minmax.heuristictile import HeuristicTile
 
 @abstractmethod
 class BokuAgent(ABC): # TODO update agents to use heuristics properly
@@ -25,7 +27,8 @@ class RandomAgent(BokuAgent):
     def play(self, game: BokuGame):
         """Play a move."""
         # get all valid moves
-        valid_moves = [move for move in game.occupied_dict if game.occupied_dict[move] == "free" and move != game.no_play_tile]
+        valid_moves = [move for move in game.occupied_dict if game.occupied_dict[move] == "free" and\
+            move != game.no_play_tile]
 
         # choose a random move
         move_index = randint(0, len(valid_moves) - 1)
@@ -86,3 +89,37 @@ class HumanAgent(BokuAgent):
                         game.capture_tile(capture)
 
         return tile_coord
+
+class HeuristicAgent(BokuAgent):
+    """Agent plays random player."""
+    def play(self, game: BokuGame):
+        """Play a move. solely based on the best heuristic value"""
+        illegal = True
+        while (illegal):
+            move_coord = game.heuristic["move order"].pop().tile
+
+            # play the move
+            illegal = game.place_tile(move_coord, self.color)
+            print(f"{self.color} HeuristicAgent plays {game.coord_to_notation(move_coord)}")
+            if illegal:
+                print("the move is illegal")
+                continue
+
+            # combined heuristic, win and capture check
+            _, capture_choice = game.heuristic_check(move_coord, self.color, True)
+
+            if capture_choice:
+                print(f"HeuristicAgent can capture one of the following tiles:{[BokuGame.coord_to_notation(coord) for coord in capture_choice]}")
+                # get the value of the capture choices
+                capture_choice_ordered = MappedQueueWithUndo()
+                for capture in capture_choice:
+                    move_heuristic = game.heuristic["move order"].get_element(HeuristicTile(capture, 0))
+                    if move_heuristic is not None:
+                        capture_choice_ordered.push(move_heuristic)
+
+                # play the capture according to best heuristic value
+                capture_coord = capture_choice_ordered.pop().tile
+                game.capture_tile(capture_coord)
+                print(f"{self.color} HeuristicAgent captures {game.coord_to_notation(capture_coord)}")
+
+        return move_coord

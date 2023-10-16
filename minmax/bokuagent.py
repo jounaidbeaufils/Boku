@@ -66,12 +66,12 @@ class HumanAgent(BokuAgent):
 
             illegal_move = game.place_tile(tile_coord, self.color)
 
-            # report if move is illegal
+            # report if move is illegal and skip to next iteration
             if illegal_move:
                 print(f"move '{tile_notation}' is not allowed")
                 continue
-            else:
-                valid_play = True
+
+            valid_play = True
 
             # check for captures
             capture_choice, _ = game.capture_check(tile_coord, self.color)

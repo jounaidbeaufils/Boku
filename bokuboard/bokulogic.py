@@ -26,7 +26,7 @@ class BokuGame:
         
         self.heuristic = {
             "move order" : MappedQueueWithUndo(),
-            "centricity" : bokudata.centricity_values,
+            "centricity" : bokudata.centricity_values_normalized,
             "white" : SumTrackingDict(),
             "black" : SumTrackingDict()}
         
@@ -180,7 +180,7 @@ class BokuGame:
             return color_win, set()
 
         # check for win by the oppositit player
-        # TODO improve heuristic accuracy with update order and potentially recursion
+        #TODO improve heuristic accuracy with update order and potentially recursion
         _, opp_win_dict = self.win_check(coord, opp_color)
 
         # check for captures after a capture, to update the heuristic
@@ -198,16 +198,28 @@ class BokuGame:
         else:
             return False, set()
 
-    def heuristic_update(self, capture_value_dict, win_value_dict, color):
+    def heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
         """push heuristic values to the heuristic dicts"""
+
+        # set default weights
+        if weights is None:
+            weights = {"capture": 1, "win": 1, "centricity": 1}
 
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()
         for key, value in win_value_dict.items():
             if key not in combined_value_dict:
-                combined_value_dict[key] = value
-            else:    
-                combined_value_dict[key] += value
+                # set the value to 0 if it is not in the dict
+                combined_value_dict[key] = 0
+            else:
+                # scale the value by the capture weight
+                combined_value_dict[key] *= weights["capture"]
+
+            # add the weighted win value to the capture value
+            combined_value_dict[key] += value * weights["win"]
+
+            # add the centricity value to the capture value
+            combined_value_dict[key] += self.heuristic["centricity"][key] * weights["centricity"]
 
         # update the heuristics
         for key, value in combined_value_dict.items():

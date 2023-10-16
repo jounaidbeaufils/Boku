@@ -17,7 +17,7 @@ import heapq
 __all__ = ['MappedQueue']
 
 
-class MappedQueue(object):
+class MappedQueue():
     """The MappedQueue class implements an efficient minimum heap. The
     smallest element can be popped in O(1) time, new elements can be pushed
     in O(log n) time, and any element can be removed or updated in O(log n)
@@ -204,6 +204,10 @@ class MappedQueueWithUndo(MappedQueue):
         super().__init__(data)
         self._history = []
 
+    def get_element(self, elt):
+        """Return the element if it exists in the priority queue, otherwise return None."""
+        return elt if elt in self.d else None
+        
     def push(self, elt):
         """Add an element to the queue."""
         result = super().push(elt)
@@ -218,10 +222,15 @@ class MappedQueueWithUndo(MappedQueue):
         return elt
 
     def update(self, elt, new):
-        """Replace an element in the queue with a new one."""
-        # Before updating, store the original value in history
-        self._history.append(('update', new, elt))
-        super().update(elt, new)
+        """Replace an element in the queue with a new one.
+        if the element is not in the queue, add it.
+        """
+        if elt not in self.d:
+            super().push(new)
+        else:
+            # Before updating, store the original value in history
+            self._history.append(('update', new, elt))
+            super().update(elt, new)
 
     def remove(self, elt):
         """Remove an element from the queue."""

@@ -1,10 +1,13 @@
 """this modul contains the BokuGame class"""
+from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
-from collections import defaultdict
 
-from . import bokudata # relative path need to be used when importing from the same package
+from bokuboard import bokudata
+from bokuboard.sumtrackingdict import SumTrackingDict
+from priorityq.mapped_queue import MappedQueueWithUndo
+from minmax.heuristictile import HeuristicTile
 
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
@@ -22,9 +25,10 @@ class BokuGame:
                                    (-1,0,1)] #sw
         
         self.heuristic = {
-            "win" : {},
-            "capture" : {},
-            "centricity" : bokudata.centricity_values}
+            "move order" : MappedQueueWithUndo(),
+            "centricity" : bokudata.centricity_values,
+            "white" : SumTrackingDict(),
+            "black" : SumTrackingDict()}
         
     def win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
@@ -77,7 +81,7 @@ class BokuGame:
         else:
             capture_pattern = ["black", "white", "white", "black"]
 
-        value_dict = {}
+        value_dict = defaultdict()
         capture_choice = set()
 
         # get the three axi
@@ -158,27 +162,59 @@ class BokuGame:
             self.win_check(tile, "white")
             self.win_check(tile, "black")
 
-    def heuristic_check(self, coord, color):
-        """runs all required heuristics that should be played when a move is played"""
+    def heuristic_check(self, coord, color, can_capture) -> tuple():
+        """runs all required heuristics that should be played when a move is played
+        a move includes a tile placement and a capture, 
+        the move is passed as the coord of the tile placed or captured.
+
+        for efficiency, heuristic_check will also be used to check for wins and captures
+        """
         # set opposition color
         opp_color = "white" if color == "black" else "black"
 
-        # check for wins after a capture, to update the heuristic
-        color_win  = self.win_check(coord, color)
+        # check for win by the player who just moved
+        color_win, color_win_dict = self.win_check(coord, color)
 
-        # earlu exit out of heuristic when a game is won
-        if color_win:
+        # early exit out of heuristic when a game is won
+        if can_capture and color_win:
             return color_win, set()
-        self.win_check(coord, opp_color)
+
+        # check for win by the oppositit player
+        # TODO improve heuristic accuracy with update order and potentially recursion
+        # _, opp_win_dict = self.win_check(coord, opp_color)
 
         # check for captures after a capture, to update the heuristic
-        color_choice = self.capture_check(coord, color)
-        self.capture_check(coord, opp_color)
+        color_choice, color_capture_dict = self.capture_check(coord, color)
+        _, opp_capture_dict = self.capture_check(coord, opp_color)
 
-        # return the board score
-        board_score = 0
+        # update the heuristics
+        self.heuristic_update(color_capture_dict, color_win_dict, color)
+        self.heuristic_update(opp_capture_dict, defaultdict(str), opp_color) # str on pupose as it will cause an error if the value is read
 
-        return color_win, color_choice, board_score
+        # return the win state (false) and capture choices
+        if can_capture:
+            return False, color_choice
+        
+        else:
+            return False, set()
+
+    def heuristic_update(self, capture_value_dict, win_value_dict, color):
+        """push heuristic values to the heuristic dicts"""
+
+        # combine capture and win value dicts
+        combined_value_dict = capture_value_dict.copy()
+        for key, value in win_value_dict.items():
+            combined_value_dict[key] += value
+
+        # update the heuristics
+        for key, value in combined_value_dict.items():
+            # update the player whos turn it is
+            self.heuristic[color][key] = value
+
+            # update the move ordering peiority queue
+            self.heuristic["move order"].push(HeuristicTile(key, value))
+
+
 
     def draw_board(self):
         """draw the board"""

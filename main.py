@@ -57,10 +57,10 @@ def run_command(command: str, game: BokuGame):
         "display" : game.draw_board,
         # i don't want to declare a wrapper function
         # this list comprehension converts from coordinates to notation
-        "history" : lambda: print([[game.coord_to_notation(coord) for coord in action] for action in game.history]),
+        "history" : lambda: print([[game.coord_to_notation(coord) for coord in action]\
+                                    for action in game.history]),
         "occupied": lambda: print(game.occupied_dict),
-        "heuristic" : lambda: print([(game.coord_to_notation(coord), value) for coord, value in game.heuristic["win"].items()]),
-        "capture heuristic" : lambda: print([(game.coord_to_notation(coord), value) for coord, value in game.heuristic["capture"].items()]),
+        "heuristic": lambda: print(game.heuristic[input("enter color: ")]),
     }
     if command not in command_dict:
         print(f"command '{command}' is not a valid command")
@@ -79,7 +79,7 @@ def get_player_agent(color) -> BokuAgent:
 
     is_ai = ""
     agent = None
-    while is_ai != "y" and is_ai != "n":
+    while is_ai not in  {"y", "n"}:
         is_ai = input("is player an AI (y/n)? ")
 
     if is_ai == "y":

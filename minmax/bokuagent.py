@@ -94,7 +94,12 @@ class HeuristicAgent(BokuAgent):
         """Play a move. solely based on the best heuristic value"""
         illegal = True
         while (illegal):
-            move_coord = game.heuristic["move order"].pop().tile
+            move = game.heuristic["move order"].pop()
+            move_coord = move.tile
+            if move_coord == game.no_play_tile:
+                new_move = game.heuristic["move order"].pop().tile
+                game.heuristic["move order"].push(move)
+                move_coord = new_move.tile
 
             # play the move
             illegal = game.place_tile(move_coord, self.color)

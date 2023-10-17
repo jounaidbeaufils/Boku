@@ -226,7 +226,7 @@ class MappedQueueWithUndo(MappedQueue):
         if the element is not in the queue, add it.
         """
         if elt not in self.d:
-            super().push(new)
+            self.push(new)
         else:
             # Before updating, store the original value in history
             self._history.append(('update', new, elt))

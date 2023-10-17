@@ -93,11 +93,11 @@ class HeuristicAgent(BokuAgent):
     def play(self, game: BokuGame):
         """Play a move. solely based on the best heuristic value"""
         illegal = True
-        while (illegal):
+        while (illegal and len(game.heuristic["move order"]) > 0):
             move = game.heuristic["move order"].pop()
             move_coord = move.tile
             if move_coord == game.no_play_tile:
-                new_move = game.heuristic["move order"].pop().tile
+                new_move = game.heuristic["move order"].pop()
                 game.heuristic["move order"].push(move)
                 move_coord = new_move.tile
 
@@ -118,4 +118,8 @@ class HeuristicAgent(BokuAgent):
                 capture = choice(list(capture_choice))
                 game.capture_tile(capture)
                 print(f"{self.color} HeuristicAgent captures {game.coord_to_notation(capture)}")
+
+        if illegal:
+            print(f"{self.color} HeuristicAgent has no legal moves left")
+            return None
         return move_coord

@@ -153,6 +153,7 @@ class BokuGame:
 
         # move the tile from occupied to open and write history
         self.occupied_dict[tile] = "free"
+        self.heuristic["move order"].push(HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * -1))
         if write_history:
             # add the removed tile on the last turn's entry
             self.history[-1].append(tile)
@@ -214,17 +215,7 @@ class BokuGame:
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()
 
-        # it's necessary to remove tiles that are occupied heuristics are always more than 1 and on empty tiles
-        for key, value in combined_value_dict.items():
-            if value == 0:
-                del combined_value_dict[key]
-                self.heuristic["move order"].remove(HeuristicTile(key, 0)) #TODO adjust priorityq to handle ignore element not in queue
-
         for key, value in win_value_dict.items():
-            if value == 0:
-                self.heuristic["move order"].remove(HeuristicTile(key, 0))
-                continue
-            
             if key not in combined_value_dict:
                 # set the value to 0 if it is not in the dict
                 combined_value_dict[key] = 0
@@ -243,11 +234,15 @@ class BokuGame:
 
         # update the heuristics
         for key, value in combined_value_dict.items():
-            # update the player whos turn it is
-            self.heuristic[color][key] = value
+            if self.occupied_dict[key] == "free":
+                # update the player whos turn it is
+                self.heuristic[color][key] = value
 
-            # update the move ordering peiority queue
-            self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value))
+                # update the move ordering peiority queue
+                self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value))
+            else:
+                # remove the tile from the move ordering peiority queue
+                self.heuristic["move order"].remove(HeuristicTile(key, 0))
 
 
 

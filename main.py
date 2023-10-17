@@ -7,8 +7,10 @@ from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent, HeuristicAgent
 
 def start_game(white=None, black=None, promt_cycle=None, games=None):
     """This methods starts a game of boku"""
+
+    game_log = {"white" : 0, "black" : 0, "draw" : 0}
     for i in range(games):
-        print(f"Starting game {i}")
+        print(f"\nStarting game {i}")
 
         # set promt cycle
         if promt_cycle is None:
@@ -31,6 +33,10 @@ def start_game(white=None, black=None, promt_cycle=None, games=None):
         second_move = choice(list(bokudata.all_coords - {first_move}))
         game.place_tile(second_move, "black")
 
+        # pleyers out of options
+        white_out = False
+        black_out = False
+
         #Play the game
         last_turn = -1
         while game_on:
@@ -39,18 +45,32 @@ def start_game(white=None, black=None, promt_cycle=None, games=None):
             if last_turn != turn:
                 last_turn = turn
                 game_balance = game.heuristic["white"].total() - game.heuristic["black"].total()
-                print(f"\n game: {i}, turn: {turn},  game balance: {round(game_balance, 3)} ")
-                print(f"{len(game.heuristic['move order'])} moves in move order priority queue")
+                print(f"\ngame: {i}, turn: {turn},  game balance: {round(game_balance, 3)} ")
 
             player = players[len(game.history) % 2]
-            move = player.play(game)
+            win, move = player.play(game)
 
-            # TODO  update how wins are checked
-            win, _ = game.win_check(move, player.color)
+            # check if player is out of options
+            if move is None and player.color == "white":
+                print("white has no legal moves")
+                white_out = True
+            elif move is None and player.color == "black":
+                print("black has no legal moves")
+                black_out = True
+            
+            else:
+                print(f"{player.color} plays {game.coord_to_notation(move)}")
+
+            # check if the playing player has won
             if win:
                 print(f"{player.color} has won the game!")
+                game_on = False
+                game_log[player.color] += 1
 
-
+            if white_out and black_out:
+                print("the game is a draw")
+                game_on = False
+                game_log["draw"] += 1
 
             if (turn + 1) % promt_cycle == 0 and player.color == "black":
                 command = "start"
@@ -58,6 +78,7 @@ def start_game(white=None, black=None, promt_cycle=None, games=None):
                     command = input("press enter to continue or type a command: ")
                     if command != "":
                         run_command(command, game)
+    print(game_log)
 
 def run_command(command: str, game: BokuGame):
     """this fuction is used to execute commands while the game loop is rnning"""
@@ -111,8 +132,8 @@ def get_player_agent(color) -> BokuAgent:
 
 
 if __name__ == "__main__":
-    black_agent = input("black agent: ")
     white_agent = input("white agent: ")
+    black_agent = input("black agent: ")
     promt_cycle_input = int(input("how many turns between prompts (1 or more)? "))
     games_number = int(input("how many games? "))
 

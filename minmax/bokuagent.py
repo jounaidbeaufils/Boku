@@ -21,12 +21,16 @@ class BokuAgent(ABC): # TODO update agents to use heuristics properly
         return turn, player
 
 class RandomAgent(BokuAgent):
-    """Agent plays random player."""
+    """Agent plays randomly."""
     def play(self, game: BokuGame):
         """Play a move."""
         # get all valid moves
         valid_moves = [move for move in game.occupied_dict if game.occupied_dict[move] == "free" and\
             move != game.no_play_tile]
+
+        # check that their is a valid move
+        if len(valid_moves) == 0:
+            return False, None
 
         # choose a random move
         move_index = randint(0, len(valid_moves) - 1)
@@ -34,17 +38,16 @@ class RandomAgent(BokuAgent):
 
         # play the move
         game.place_tile(move, self.color)
-        print(f"{self.color} RandomAgent plays {game.coord_to_notation(move)}")
 
         # combined heuristic, win and capture check
-        _, capture_choice = game.heuristic_check(move, self.color, True)
+        win, capture_choice = game.heuristic_check(move, self.color, True)
 
         if capture_choice:
             capture = choice(list(capture_choice))
             game.capture_tile(capture)
             print(f"{self.color} RandomAgent captures {game.coord_to_notation(capture)}")
 
-        return move
+        return win, move
 
 
 class HumanAgent(BokuAgent):
@@ -75,7 +78,7 @@ class HumanAgent(BokuAgent):
             valid_play = True
 
             # check for captures
-            capture_choice, _ = game.capture_check(tile_coord, self.color)
+            win, capture_choice = game.heuristic_check(tile_coord, self.color)
             if capture_choice:
                 illegal_capture = True
                 while illegal_capture:
@@ -86,10 +89,10 @@ class HumanAgent(BokuAgent):
                         illegal_capture =False
                         game.capture_tile(capture)
 
-        return tile_coord
+        return win, tile_coord #TODO set up human skipping turn
 
 class HeuristicAgent(BokuAgent):
-    """Agent plays random player."""
+    """Agent plays by using the first move in the priorityq."""
     def play(self, game: BokuGame):
         """Play a move. solely based on the best heuristic value"""
         illegal = True
@@ -97,19 +100,21 @@ class HeuristicAgent(BokuAgent):
             move = game.heuristic["move order"].pop()
             move_coord = move.tile
             if move_coord == game.no_play_tile:
-                new_move = game.heuristic["move order"].pop()
-                game.heuristic["move order"].push(move)
-                move_coord = new_move.tile
+                if len(game.heuristic["move order"]) > 0: #another move is available
+                    new_move = game.heuristic["move order"].pop()
+                    game.heuristic["move order"].push(move)
+                    move_coord = new_move.tile
+                else:
+                    break
 
             # play the move
             illegal = game.place_tile(move_coord, self.color)
-            print(f"{self.color} HeuristicAgent plays {game.coord_to_notation(move_coord)}")
             if illegal:
                 print("the move is illegal")
                 continue
 
             # combined heuristic, win and capture check
-            _, capture_choice = game.heuristic_check(move_coord, self.color, True)
+            win, capture_choice = game.heuristic_check(move_coord, self.color, True)
 
             if capture_choice:
                 print(f"HeuristicAgent can capture one of the following tiles:{[BokuGame.coord_to_notation(coord) for coord in capture_choice]}")
@@ -121,5 +126,6 @@ class HeuristicAgent(BokuAgent):
 
         if illegal:
             print(f"{self.color} HeuristicAgent has no legal moves left")
-            return None
-        return move_coord
+            game.skip_turn()
+            return False, None
+        return win, move_coord

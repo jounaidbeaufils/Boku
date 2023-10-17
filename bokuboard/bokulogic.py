@@ -31,7 +31,7 @@ class BokuGame:
             "black" : SumTrackingDict()}
 
         for coord, value in bokudata.centricity_values.items():
-            self.heuristic["move order"].push(HeuristicTile(coord, value))
+            self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
         
     def win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
@@ -213,7 +213,18 @@ class BokuGame:
 
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()
+
+        # it's necessary to remove tiles that are occupied heuristics are always more than 1 and on empty tiles
+        for key, value in combined_value_dict.items():
+            if value == 0:
+                del combined_value_dict[key]
+                self.heuristic["move order"].remove(HeuristicTile(key, 0)) #TODO adjust priorityq to handle ignore element not in queue
+
         for key, value in win_value_dict.items():
+            if value == 0:
+                self.heuristic["move order"].remove(HeuristicTile(key, 0))
+                continue
+            
             if key not in combined_value_dict:
                 # set the value to 0 if it is not in the dict
                 combined_value_dict[key] = 0

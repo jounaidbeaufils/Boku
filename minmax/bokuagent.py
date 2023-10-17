@@ -3,8 +3,6 @@ from random import randint, choice
 
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
-from priorityq.mapped_queue import MappedQueueWithUndo
-from minmax.heuristictile import HeuristicTile
 
 @abstractmethod
 class BokuAgent(ABC): # TODO update agents to use heuristics properly
@@ -110,16 +108,9 @@ class HeuristicAgent(BokuAgent):
 
             if capture_choice:
                 print(f"HeuristicAgent can capture one of the following tiles:{[BokuGame.coord_to_notation(coord) for coord in capture_choice]}")
-                # get the value of the capture choices
-                capture_choice_ordered = MappedQueueWithUndo()
-                for capture in capture_choice:
-                    move_heuristic = game.heuristic["move order"].get_element(HeuristicTile(capture, 0))
-                    if move_heuristic is not None:
-                        capture_choice_ordered.push(move_heuristic)
-
-                # play the capture according to best heuristic value
-                capture_coord = capture_choice_ordered.pop().tile
-                game.capture_tile(capture_coord)
-                print(f"{self.color} HeuristicAgent captures {game.coord_to_notation(capture_coord)}")
-
+                
+                # capture at random because occupied tiles don't have a heuristic
+                capture = choice(list(capture_choice))
+                game.capture_tile(capture)
+                print(f"{self.color} HeuristicAgent captures {game.coord_to_notation(capture)}")
         return move_coord

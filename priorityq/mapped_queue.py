@@ -233,7 +233,12 @@ class MappedQueueWithUndo(MappedQueue):
             super().update(elt, new)
 
     def remove(self, elt):
-        """Remove an element from the queue."""
+        """Remove an element from the queue.
+        skip if the element is not in the queue."""
+
+        elt_get = self.get_element(elt)
+        if elt_get is None:
+            return
         # Store the removed element for undo purposes
         self._history.append(('push', elt))
         super().remove(elt)

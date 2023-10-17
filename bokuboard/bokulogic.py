@@ -147,6 +147,15 @@ class BokuGame:
                 #self.heuristic["move order"].remove(HeuristicTile(coord, 0))
 
         return illegal
+    def skip_turn(self):
+        """skips the turn of the player who's turn it is"""
+
+        # write history as empty turn
+        self.history.append([""])
+
+        #reset no_play_tile. it is only blocked for one play
+        self.no_play_tile = tuple()
+
 
     def capture_tile(self, tile, write_history=True):
         """captes the tile it recieved in paramaters and locks that tile"""
@@ -294,16 +303,14 @@ class BokuGame:
                 # replace the captured tile without writing to history
                 self.place_tile(captured,captured_color,False)
 
-            # after the undo if we are right after a capture, set the no_play_tile
+            # after the undo if we are right after a capture, so set the no_play_tile
             if len(previous_action) > 1:
                 self.no_play_tile = previous_action[1]
 
-            else:
-                tile = action[0]
-
-            # remove the tile played using capture without writing to history
-            # wriet_history=False also disables the tile lock
-            self.capture_tile(tile, False)
+            if tile != "": # if the tile is not empty, then a tile was placed (for skipped turns)
+                # remove the tile played using capture without writing to history
+                # write_history=False also disables the tile lock
+                self.capture_tile(tile, False)
 
         return action
 

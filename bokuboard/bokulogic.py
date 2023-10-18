@@ -143,9 +143,6 @@ class BokuGame:
             self.occupied_dict[coord] = tile_color
             if write_history:
                 self.history.append([coord])
-                #print(f"removed {HeuristicTile(coord, 0)} from {self.heuristic['move order']}")
-                #print(f"{coord} is {self.coord_to_notation(coord)}")
-                #self.heuristic["move order"].remove(HeuristicTile(coord, 0))
 
         return illegal
     def skip_turn(self):
@@ -206,7 +203,7 @@ class BokuGame:
 
         # update the heuristics
         self.heuristic_update(color_capture_dict, color_win_dict, color)
-        self.heuristic_update(opp_capture_dict, opp_win_dict, opp_color) # str on pupose as it will cause an error if the value is read
+        self.heuristic_update(opp_capture_dict, opp_win_dict, opp_color)
 
         # return the win state (false) and capture choices
         if can_capture:
@@ -246,13 +243,13 @@ class BokuGame:
         for key, value in combined_value_dict.items():
             if self.occupied_dict[key] == "free":
                 # update the player whos turn it is
-                self.heuristic[color][key] = value
+                self.heuristic[color][key] = value #TODO track number of changes for undo
 
                 # update the move ordering peiority queue
-                self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value))
+                self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value)) #TODO track number of changes for undo
             else:
                 # remove the tile from the move ordering peiority queue
-                self.heuristic["move order"].remove(HeuristicTile(key, 0))
+                self.heuristic["move order"].remove(HeuristicTile(key, 0)) #TODO track number of changes for undo
 
 
 

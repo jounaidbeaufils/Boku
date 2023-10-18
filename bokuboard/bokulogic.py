@@ -28,7 +28,8 @@ class BokuGame:
             "move order" : MappedQueueWithUndo(),
             "centricity" : bokudata.centricity_values_normalized,
             "white" : SumTrackingDict(),
-            "black" : SumTrackingDict()}
+            "black" : SumTrackingDict(),
+            "winner": ""} #TODO update this varianle in heuristic check
 
         for coord, value in bokudata.centricity_values.items():
             self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
@@ -283,7 +284,7 @@ class BokuGame:
 
         plt.show(block=False)
 
-    def undo(self):
+    def undo(self): #TODO ensure that the undo works for the heuristics
         """this function will undo the one players action"""
 
         if self.history:
@@ -313,6 +314,9 @@ class BokuGame:
                 self.capture_tile(tile, False)
 
         return action
+
+    def eval(self):
+        raise NotImplementedError("get game balance logic here, including wins")
 
     @staticmethod
     def notation_to_coord(notation: str):

@@ -207,7 +207,7 @@ class MappedQueueWithUndo(MappedQueue):
     def get_element(self, elt):
         """Return the element if it exists in the priority queue, otherwise return None."""
         return elt if elt in self.d else None
-        
+
     def push(self, elt):
         """Add an element to the queue."""
         result = super().push(elt)
@@ -247,7 +247,7 @@ class MappedQueueWithUndo(MappedQueue):
         """Undo the last operation."""
         if not self._history:
             return
-        
+
         action, *args = self._history.pop()
         # Call the inverse function without recording to history
         if action == 'push':
@@ -268,3 +268,17 @@ class MappedQueueWithUndo(MappedQueue):
     def _silent_update(self, elt, new):
         """Update without recording to history."""
         super().update(elt, new)
+
+class MappedQueueIterator:
+    """This ensures that the priority queue is not modified while iterating over it.
+        this is useful while in the minmax algorithm when iterating over the children of a node."""
+    def __init__(self, heap):
+        self.temp_heap = list(heap)  # create a shallow copy
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self.temp_heap:
+            raise StopIteration
+        return heapq.heappop(self.temp_heap)

@@ -204,6 +204,9 @@ class MappedQueueWithUndo(MappedQueue):
         super().__init__(data)
         self._history = []
 
+    def __iter__(self):
+        return MappedQueueIterator(self.h)
+
     def get_element(self, elt):
         """Return the element if it exists in the priority queue, otherwise return None."""
         return elt if elt in self.d else None

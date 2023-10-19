@@ -4,6 +4,7 @@ from random import choice
 from bokuboard import bokudata
 from bokuboard.bokulogic import BokuGame
 from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent, HeuristicAgent
+from minmax.heuristictile import HeuristicTile
 
 def play_x_games(x=None, white=None, black=None, promt_cycle=None):
     """plays x games of boku"""
@@ -15,7 +16,7 @@ def play_x_games(x=None, white=None, black=None, promt_cycle=None):
         print(f"\nStarting game {i}")
         start_game(i, white=white, black=black, promt_cycle=promt_cycle, game_log=game_log)
 
-def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None):
+def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, random_start=True):
     """This methods starts a game of boku"""
 
     # set promt cycle
@@ -31,11 +32,14 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None):
     game = BokuGame()
 
     #starting board (for testing purposes)
-    first_move = choice(list(bokudata.all_coords))
-    game.place_tile(first_move, "white")
+    if random_start:
+        first_move = choice(list(bokudata.all_coords))
+        game.place_tile(first_move, "white")
+        game.heuristic["move order"].remove(HeuristicTile(first_move, 0))
 
-    second_move = choice(list(bokudata.all_coords - {first_move}))
-    game.place_tile(second_move, "black")
+        second_move = choice(list(bokudata.all_coords - {first_move}))
+        game.place_tile(second_move, "black")
+        game.heuristic["move order"].remove(HeuristicTile(second_move, 0))
 
     # pleyers out of options
     white_out = False

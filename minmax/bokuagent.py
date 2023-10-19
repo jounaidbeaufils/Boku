@@ -3,9 +3,10 @@ from random import randint, choice
 
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
+from minmax.minmaxalgo import ab_negmax_random_capture
 
 @abstractmethod
-class BokuAgent(ABC): # TODO update agents to use heuristics properly
+class BokuAgent(ABC):
     """Abstract base class for all Boku agents."""
     def __init__(self, color: str):
         self.color = color
@@ -78,7 +79,7 @@ class HumanAgent(BokuAgent):
             valid_play = True
 
             # check for captures
-            win, capture_choice = game.heuristic_check(tile_coord, self.color)
+            win, capture_choice = game.heuristic_check(tile_coord, self.color, True)
             if capture_choice:
                 illegal_capture = True
                 while illegal_capture:
@@ -93,8 +94,10 @@ class HumanAgent(BokuAgent):
 
 class HeuristicAgent(BokuAgent):
     """Agent plays by using the first move in the priorityq."""
+
     def play(self, game: BokuGame):
         """Play a move. solely based on the best heuristic value"""
+        #TODO remove illegal check, no longer needed, but implement turn skipping
         illegal = True
         while (illegal and len(game.heuristic["move order"]) > 0):
             move = game.heuristic["move order"].pop()
@@ -129,3 +132,38 @@ class HeuristicAgent(BokuAgent):
             game.skip_turn()
             return False, None
         return win, move_coord
+
+class ABNMAgentRandomCapture(BokuAgent):
+    """Agent plays using a alpha-beta negamax search, will ask for ply depth at each turn.
+       the agent will capture randomly when required to capture"""
+
+    def __init__(self, color: str, depth:int=None):
+        super().__init__(color)
+        self.depth = depth
+    
+    def play(self, game: BokuGame):
+        """play a move"""
+        # check that a depth is given
+        if self.depth is None:
+            self.depth = int(input(f"what depth should the {self.color} agent search? "))
+
+        # run search
+        move, _ = ab_negmax_random_capture(node=game, depth=self.depth)
+
+        # play the move
+        game.place_tile(move, self.color)
+
+        # combined heuristic, win and capture check
+        win, capture_choice = game.heuristic_check(move, self.color, True)
+
+        if win:
+            return win, move
+
+        # check if there is a capture
+        if capture_choice:
+            # play a random capture
+            capture = choice(list(capture_choice))
+            game.capture_tile(capture)
+            print(f"{self.color} ABNMAgentRandomCapture captures {game.coord_to_notation(capture)}")
+
+        return win, move

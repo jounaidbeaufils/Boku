@@ -249,6 +249,7 @@ class MappedQueueWithUndo(MappedQueue):
     def undo(self):
         """Undo the last operation."""
         if not self._history:
+            raise ValueError("No operations to undo")
             return
 
         action, *args = self._history.pop()

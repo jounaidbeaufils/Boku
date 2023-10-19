@@ -5,17 +5,21 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
 
 from bokuboard import bokudata
-from bokuboard.sumtrackingdict import SumTrackingDict
+from bokuboard.sumtrackingdict import SumTrackingDictWithUndo
 from priorityq.mapped_queue import MappedQueueWithUndo
 from minmax.heuristictile import HeuristicTile
 
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
+    #TODO combined function to play and report wins, what about captures?
+    #TODO rename private methods
     def __init__(self):
         self.occupied_dict = {coord : "free" for coord in bokudata.all_coords}
         self.no_play_tile = tuple()
+
         self.history = []
+        self.heuristic_undo_tracker = []
 
         self.neibghbour_vectors = [(0,1,-1), #n
                                    (1,0,-1), #ne
@@ -27,9 +31,9 @@ class BokuGame:
         self.heuristic = {
             "move order" : MappedQueueWithUndo(),
             "centricity" : bokudata.centricity_values_normalized,
-            "white" : SumTrackingDict(),
-            "black" : SumTrackingDict(),
-            "winner": ""} #TODO update this varianle in heuristic check
+            "white" : SumTrackingDictWithUndo(),
+            "black" : SumTrackingDictWithUndo(),
+            "winner": ""}
 
         for coord, value in bokudata.centricity_values.items():
             self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
@@ -129,9 +133,8 @@ class BokuGame:
     def place_tile(self, coord, tile_color, write_history=True) -> bool:
         """places a tile, and then calls win check and capture check"""
 
-        illegal = False
-
         # check for if the tile is illegal
+        illegal = False
         if coord == self.no_play_tile or self.occupied_dict[coord] != "free":
             illegal = True
 
@@ -144,9 +147,15 @@ class BokuGame:
             if write_history:
                 self.history.append([coord])
 
+                # this entry will allow any heuristic changes to append to the counter
+                # ensuring that when a move is undone the right number of heuristic changes have been undone
+                self.heuristic_undo_tracker.append([0,0,0])
+
         return illegal
     def skip_turn(self):
         """skips the turn of the player who's turn it is"""
+        # TODO add a draw check
+        # consider adding two skip turns to the move order heuristic
 
         # write history as empty turn
         self.history.append([""])
@@ -157,12 +166,18 @@ class BokuGame:
 
     def capture_tile(self, tile, write_history=True):
         """captes the tile it recieved in paramaters and locks that tile"""
+        #TODO consider that capture should also runheuristics. howver heuristics are currently called by Agents
 
-        # move the tile from occupied to open and write history
+        # move the tile from occupied to open
         self.occupied_dict[tile] = "free"
-        self.heuristic["move order"].push(HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * -1))
+
+        # return the tile to the move order heuristic
+        heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * -1)
+        self.heuristic["move order"].push(heuristic_tile)
+
+        # write move to history
         if write_history:
-            # add the removed tile on the last turn's entry
+            # add the removed tile on the latest turn's entry
             self.history[-1].append(tile)
 
             # block the tile for the next play
@@ -183,6 +198,8 @@ class BokuGame:
 
         for efficiency, heuristic_check will also be used to check for wins and captures
         """
+        #TODO can_capture is no longer used, remove.
+
         # set opposition color
         opp_color = "white" if color == "black" else "black"
 
@@ -191,6 +208,7 @@ class BokuGame:
 
         # early exit out of heuristic when a game is won
         if can_capture and color_win:
+            self.heuristic["winner"] = color
             return color_win, set()
 
         # check for win by the oppositit player
@@ -240,17 +258,30 @@ class BokuGame:
             combined_value_dict[key] *= -1
 
         # update the heuristics
+        move_order_changes = 0
+        color_changes = 0
         for key, value in combined_value_dict.items():
             if self.occupied_dict[key] == "free":
                 # update the player whos turn it is
-                self.heuristic[color][key] = value #TODO track number of changes for undo
+                self.heuristic[color][key] = value
+                color_changes += 1
 
                 # update the move ordering peiority queue
-                self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value)) #TODO track number of changes for undo
+                self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value))
+                move_order_changes += 1
             else:
                 # remove the tile from the move ordering peiority queue
-                self.heuristic["move order"].remove(HeuristicTile(key, 0)) #TODO track number of changes for undo
+                self.heuristic["move order"].remove(HeuristicTile(key, 0))
+                move_order_changes += 1
 
+        # add the heuristic change to the heuristic undo tracker
+        # the heuristic data structures can undo past changes
+        # but the are changed multiple times a turn
+        self.heuristic_undo_tracker[-1][0] += move_order_changes
+
+        # white and black have their own heuristic per turn
+        color_pos = 1 if color == "white" else 2
+        self.heuristic_undo_tracker[-1][color_pos] += color_changes
 
 
     def draw_board(self):
@@ -285,6 +316,7 @@ class BokuGame:
         """this function will undo the one players action"""
 
         if self.history:
+            ## undo the changes to the board
             captured_color = "white" if len(self.history) % 2 == 0 else "black"
             action = self.history.pop()
             previous_action = self.history[-1]
@@ -293,6 +325,7 @@ class BokuGame:
 
             # checking if the last turn included a capture
             if len(action) > 1:
+                # set the placed tile and the captured tile
                 tile, captured = action[0], action[1]
 
                 #reset the no_play_tile because the capture was undone
@@ -301,19 +334,55 @@ class BokuGame:
                 # replace the captured tile without writing to history
                 self.place_tile(captured,captured_color,False)
 
+            else:
+                # set the placed tile
+                tile = action[0]
+
             # after the undo if we are right after a capture, so set the no_play_tile
             if len(previous_action) > 1:
                 self.no_play_tile = previous_action[1]
 
-            if tile != "": # if the tile is not empty, then a tile was placed (for skipped turns)
+            # if the tile is not empty, then a tile was placed (for skipped turns)
+            if tile != "":
                 # remove the tile played using capture without writing to history
                 # write_history=False also disables the tile lock
                 self.capture_tile(tile, False)
 
+
+            ## undo the changes to the heuristics
+
+            move_order, white, black = self.heuristic_undo_tracker.pop()
+            #print(f"move order: {move_order}, white: {white}, black: {black}")
+            # move order heuristic undo
+            for i in range(move_order):
+                #print(f"undoing move order {i} of {move_order}")
+                self.heuristic["move order"].undo()
+
+            # white heuristic undo
+            for _ in range(white):
+                self.heuristic["white"].undo()
+                
+            # black heuristic undo
+            for i in range(black):
+                #print(f"undoing black heuristic {i} of {black}")
+                self.heuristic["black"].undo()
+
         return action
 
     def eval(self):
-        raise NotImplementedError("get game balance logic here, including wins")
+        """evaluate the game state and return a value"""
+        #TODO this function should be replaced by different functions for different agents
+        # return a value if not win
+        if self.heuristic["winner"] == "":
+            return round((self.heuristic["black"].total() - self.heuristic["white"].total()) * 1000)
+
+        # return a value for white win
+        if self.heuristic["winner"] == "white":
+            return float("inf")
+
+        # return a value for white loss or draw
+        return float("-inf")
+
 
     @staticmethod
     def notation_to_coord(notation: str):

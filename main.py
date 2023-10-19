@@ -3,7 +3,7 @@ from random import choice
 
 from bokuboard import bokudata
 from bokuboard.bokulogic import BokuGame
-from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent, HeuristicAgent
+from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent, HeuristicAgent, ABNMAgentRandomCapture
 from minmax.heuristictile import HeuristicTile
 
 def play_x_games(x=None, white=None, black=None, promt_cycle=None):
@@ -15,6 +15,8 @@ def play_x_games(x=None, white=None, black=None, promt_cycle=None):
     for i in range(int(x)):
         print(f"\nStarting game {i}")
         start_game(i, white=white, black=black, promt_cycle=promt_cycle, game_log=game_log)
+
+    print(f"{game_log}")
 
 def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, random_start=True):
     """This methods starts a game of boku"""
@@ -121,6 +123,7 @@ agent_dict = {
         "human" : HumanAgent,
         "random" : RandomAgent,
         "heuristic" : HeuristicAgent,
+        "abnm" : ABNMAgentRandomCapture,
     }
 
 def get_player_agent(color) -> BokuAgent:

@@ -103,7 +103,8 @@ class HeuristicAgent(BokuAgent):
             move = game.heuristic["move order"].pop()
             move_coord = move.tile
             if move_coord == game.no_play_tile:
-                if len(game.heuristic["move order"]) > 0: #another move is available
+                # if another move is available 
+                if len(game.heuristic["move order"]) > 0: #TODO this will mess woth the undo, fit it
                     new_move = game.heuristic["move order"].pop()
                     game.heuristic["move order"].push(move)
                     move_coord = new_move.tile

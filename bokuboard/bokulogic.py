@@ -146,10 +146,11 @@ class BokuGame:
             self.occupied_dict[coord] = tile_color
             if write_history:
                 self.history.append([coord])
+                self.heuristic["move order"].remove(HeuristicTile(coord, 0)) # remove a tile that is placed from the move order heuristic
 
                 # this entry will allow any heuristic changes to append to the counter
                 # ensuring that when a move is undone the right number of heuristic changes have been undone
-                self.heuristic_undo_tracker.append([0,0,0])
+                self.heuristic_undo_tracker.append([1,0,0]) #intantiate with the above change
 
         return illegal
     def skip_turn(self):
@@ -159,6 +160,9 @@ class BokuGame:
 
         # write history as empty turn
         self.history.append([""])
+
+        # ensuring that when a move is undone the right number of heuristic changes have been undone
+        self.heuristic_undo_tracker.append([0,0,0])
 
         #reset no_play_tile. it is only blocked for one play
         self.no_play_tile = tuple()
@@ -180,16 +184,6 @@ class BokuGame:
             # add the removed tile on the latest turn's entry
             self.history[-1].append(tile)
 
-            # block the tile for the next play
-            self.no_play_tile = tile
-
-            # check for captures after a capture, to update the heuristic
-            self.capture_check(tile, "white")
-            self.capture_check(tile, "black")
-
-            # check for wins after a capture, to update the heuristic
-            self.win_check(tile, "white")
-            self.win_check(tile, "black")
 
     def heuristic_check(self, coord, color, can_capture) -> tuple():
         """runs all required heuristics that should be played when a move is played
@@ -269,10 +263,6 @@ class BokuGame:
                 # update the move ordering peiority queue
                 self.heuristic["move order"].update(HeuristicTile(key, 0), HeuristicTile(key, value))
                 move_order_changes += 1
-            else:
-                # remove the tile from the move ordering peiority queue
-                self.heuristic["move order"].remove(HeuristicTile(key, 0))
-                move_order_changes += 1
 
         # add the heuristic change to the heuristic undo tracker
         # the heuristic data structures can undo past changes
@@ -319,7 +309,7 @@ class BokuGame:
             ## undo the changes to the board
             captured_color = "white" if len(self.history) % 2 == 0 else "black"
             action = self.history.pop()
-            previous_action = self.history[-1]
+            previous_action = self.history[-1] if self.history else [tuple(), tuple()] #edge case when undoning the first move
             tile = ""
             captured = ""
 

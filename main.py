@@ -6,7 +6,7 @@ from bokuboard.bokulogic import BokuGame
 from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent, HeuristicAgent, ABNMAgentRandomCapture
 from minmax.heuristictile import HeuristicTile
 
-def play_x_games(x=None, white=None, black=None, promt_cycle=None):
+def play_x_games(x=None, white=None, black=None, promt_cycle=None, random_start=None):
     """plays x games of boku"""
     if x is None:
         x = int(input("how many games do you want to play? "))
@@ -14,11 +14,11 @@ def play_x_games(x=None, white=None, black=None, promt_cycle=None):
     game_log = {"white win" : 0, "black win" : 0, "draw" : 0, "black suprise win" : 0 , "white suprise win" : 0}
     for i in range(int(x)):
         print(f"\nStarting game {i}")
-        start_game(i, white=white, black=black, promt_cycle=promt_cycle, game_log=game_log)
+        start_game(i, white=white, black=black, promt_cycle=promt_cycle, game_log=game_log, random_start=random_start)
 
     print(f"{game_log}")
 
-def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, random_start=True):
+def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, random_start=None):
     """This methods starts a game of boku"""
 
     # set promt cycle
@@ -54,8 +54,8 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
         turn = len(game.history) // 2
         if last_turn != turn:
             last_turn = turn
-            game_balance = game.heuristic["black"].total() - game.heuristic["white"].total()
-            print(f"\ngame: {game_n}, turn: {turn},  game balance: {round(game_balance, 3)} ")
+            game_balance = game.eval()
+            print(f"\ngame: {game_n}, turn: {turn},  game balance: {game_balance} ")
 
         player = players[len(game.history) % 2]
         win, move = player.play(game)
@@ -69,7 +69,7 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
             black_out = True
         
         else:
-            print(f"{player.color} plays {game.coord_to_notation(move)}")
+            print(f"{player.color} plays {game.coord_to_notation(move)}") #TODO print capture move correctly, read history
 
         # check if the playing player has won
         if win:
@@ -86,7 +86,7 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
             game_log["draw"] += 1
 
         # run command opportunity at interval
-        if (turn + 1) % promt_cycle == 0 and player.color == "black":
+        if ((turn + 1) % promt_cycle == 0 and player.color == "black") or not game_on:
             run_command("start", game)
 
 def run_command(command: str, game: BokuGame):
@@ -106,6 +106,8 @@ def run_command(command: str, game: BokuGame):
                                         for action in game.history]),
             "occupied": lambda: print(game.occupied_dict),
             "heuristic": lambda: print(game.heuristic[input("enter color: ")]),
+            "undo tracker": lambda: print(game.heuristic_undo_tracker),
+            "no play": lambda: print(game.coord_to_notation(game.no_play_tile)),
         }
         if command not in command_dict:
             print(f"command '{command}' is not a valid command")
@@ -144,7 +146,8 @@ def get_player_agent(color) -> BokuAgent:
 if __name__ == "__main__":
     white_agent = input("white agent: ")
     black_agent = input("black agent: ")
+    random_start_input = input("random start? (y/n) ").lower() == "y"
     promt_cycle_input = int(input("how many turns between prompts (1 or more)? "))
     games_number = int(input("how many games? "))
 
-    play_x_games(games_number, white_agent, black_agent, promt_cycle_input)
+    play_x_games(games_number, white_agent, black_agent, promt_cycle_input, random_start_input)

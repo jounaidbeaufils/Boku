@@ -13,7 +13,9 @@ def ab_negmax_random_capture(node: BokuGame,
     # Base Case: check if we are at a leaf node
     # curusion depth is is reached or the game is over (win, lose, draw)
     if depth == 0 or node.heuristic["winner"] != "":
-        return node.history[-1][0], node.eval()
+        # the board reports the value according to white's perspective
+        value = node.eval() if len(node.history) % 2 == 0 else -node.eval()
+        return node.history[-1][0], value
     score = float('-inf')
     best_move = None
 
@@ -28,7 +30,6 @@ def ab_negmax_random_capture(node: BokuGame,
             continue
 
         # play the move (generate the successor state)
-        #print(f"depth: {depth}, move: {move.tile}")
         node.place_tile(move.tile, color)
         _, capture_choice = node.heuristic_check(move.tile, color, True) #TODO a win can be detected here, shoult it?
 
@@ -40,7 +41,7 @@ def ab_negmax_random_capture(node: BokuGame,
 
         # call negamax on the successor state, flip the signs
         _, value = ab_negmax_random_capture(node, depth - 1, -beta, -alpha)
-        value = -value
+        value *= -1
 
         # undo the move, so we only ever use one BokuGame object
         node.undo()

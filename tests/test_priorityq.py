@@ -20,3 +20,19 @@ q.remove(top_tup)
 
 new_top_tup = q.pop()
 print(f"new_top_tup: {new_top_tup}")
+
+print("internal representation of the queue:")
+q2 = MappedQueueWithUndo()
+for _ in range(5):
+    q2.push(choice(range(10)))
+
+
+print("\nq2.h:")
+print(q2.h)
+
+print("\nq2.__iter__():")
+for elt in q2:
+    print(elt)
+print("\nq2.pop()")
+for _ in range (len(q2.h)):
+    print(q2.pop())

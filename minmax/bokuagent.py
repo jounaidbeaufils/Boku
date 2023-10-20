@@ -26,8 +26,8 @@ class RandomAgent(BokuAgent):
     def play(self, game: BokuGame):
         """Play a move."""
         # get all valid moves
-        valid_moves = [move for move in game.occupied_dict if game.occupied_dict[move] == "free" and\
-            move != game.no_play_tile]
+        valid_moves = [move for move in game.occupied_dict if game.occupied_dict[move] == "free"
+            and move != game.no_play_tile]
 
         # check that their is a valid move
         if len(valid_moves) == 0:
@@ -57,7 +57,7 @@ class HumanAgent(BokuAgent):
         """Play a move by asking the user for input."""
         valid_play = False
         tile_coord = tuple()
-        while(not valid_play):
+        while not valid_play:
             # input tile
             tile_notation = input(f"which tile does {self.color.upper()} place? ")
 
@@ -84,7 +84,8 @@ class HumanAgent(BokuAgent):
                 illegal_capture = True
                 while illegal_capture:
                     notation_list = [game.coord_to_notation(coord) for coord in capture_choice]
-                    capture = input(f"which tile does {self.color.upper()} capture from the following list {notation_list}? ")
+                    capture = input(
+                        f"which tile does {self.color.upper()} capture from {notation_list}? ")
                     capture = game.notation_to_coord(capture)
                     if capture in capture_choice:
                         illegal_capture =False
@@ -103,7 +104,7 @@ class HeuristicAgent(BokuAgent):
             move = game.heuristic["move order"].pop()
             move_coord = move.tile
             if move_coord == game.no_play_tile:
-                # if another move is available 
+                # if another move is available
                 if len(game.heuristic["move order"]) > 0: #TODO this will mess woth the undo, fit it
                     new_move = game.heuristic["move order"].pop()
                     game.heuristic["move order"].push(move)
@@ -121,8 +122,9 @@ class HeuristicAgent(BokuAgent):
             win, capture_choice = game.heuristic_check(move_coord, self.color, True)
 
             if capture_choice:
-                print(f"HeuristicAgent can capture one of the following tiles:{[BokuGame.coord_to_notation(coord) for coord in capture_choice]}")
-                
+                notation_list = [game.coord_to_notation(coord) for coord in capture_choice]
+                print(f"{self.color} can capture from:{notation_list}")
+
                 # capture at random because occupied tiles don't have a heuristic
                 capture = choice(list(capture_choice))
                 game.capture_tile(capture)
@@ -141,7 +143,7 @@ class ABNMAgentRandomCapture(BokuAgent):
     def __init__(self, color: str, depth:int=None):
         super().__init__(color)
         self.depth = depth
-    
+
     def play(self, game: BokuGame):
         """play a move"""
         # check that a depth is given

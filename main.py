@@ -3,7 +3,8 @@ from random import choice
 
 from bokuboard import bokudata
 from bokuboard.bokulogic import BokuGame
-from minmax.bokuagent import BokuAgent, RandomAgent, HumanAgent, HeuristicAgent, ABNMAgentRandomCapture
+from minmax.bokuagent import (BokuAgent, RandomAgent, HumanAgent, HeuristicAgent,
+                             ABNMAgentRandomCapture)
 from minmax.heuristictile import HeuristicTile
 
 def play_x_games(x=None, white=None, black=None, promt_cycle=None, random_start=None):
@@ -11,10 +12,16 @@ def play_x_games(x=None, white=None, black=None, promt_cycle=None, random_start=
     if x is None:
         x = int(input("how many games do you want to play? "))
 
-    game_log = {"white win" : 0, "black win" : 0, "draw" : 0, "black suprise win" : 0 , "white suprise win" : 0}
+    game_log = {"white win" : 0,
+                "black win" : 0,
+                "draw" : 0,
+                "black suprise win" : 0,
+                "white suprise win" : 0}
+
     for i in range(int(x)):
         print(f"\nStarting game {i}")
-        start_game(i, white=white, black=black, promt_cycle=promt_cycle, game_log=game_log, random_start=random_start)
+        start_game(i, white=white, black=black, promt_cycle=promt_cycle,
+                   game_log=game_log, random_start=random_start)
 
     print(f"{game_log}")
 
@@ -23,7 +30,8 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
 
     # set promt cycle
     if promt_cycle is None:
-        promt_cycle = int(input("how many turns between prompts (1 or more)? "))# TODO command on human turn, new module?
+        # TODO command on human turn, new module?
+        promt_cycle = int(input("how many turns between prompts (1 or more)? "))
 
     # set players
     players = [get_player_agent("white") if white is None else agent_dict[white]("white"),
@@ -67,9 +75,10 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
         elif move is None and player.color == "black":
             print("black has no legal moves")
             black_out = True
-        
+
         else:
-            print(f"{player.color} plays {game.coord_to_notation(move)}") #TODO print capture move correctly, read history
+            #TODO print capture move correctly, read history
+            print(f"{player.color} plays {game.coord_to_notation(move)}")
 
         # check if the playing player has won
         if win:
@@ -136,7 +145,8 @@ def get_player_agent(color) -> BokuAgent:
     agent_choice = ""
 
     while agent_choice not in  agent_dict:
-        agent_choice = input(f"Available agents are: {str(agent_list)}. \nwhat agent is {color.upper()}? ")
+        agent_choice = input(f"""Available agents are: {str(agent_list)}.
+                                 what agent is {color.upper()}? """)
         agent = agent_dict[agent_choice](color)
 
     return agent

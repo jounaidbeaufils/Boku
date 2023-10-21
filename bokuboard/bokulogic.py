@@ -143,7 +143,8 @@ class BokuGame:
 
         # perform legal move
         else:
-            self.no_play_tile = tuple() #reset; tile is only blocked for one play
+            # reset no_play_tile; tile is only blocked for one play
+            self.no_play_tile = tuple()
 
             # move tile from open to occupied and write history
             self.occupied_dict[coord] = tile_color
@@ -152,13 +153,15 @@ class BokuGame:
                 self.history.append([coord])
 
                 # add the heuristic undo tracker entry
-                # for every undo multiple undos are required on the heuristic data structures
-                # premtively set the tracker to [1, 0, 0] for a single change
-                self.heuristic_undo_tracker.append([1,0,0])
+                # for every boiard undo multiple undos are required on the heuristic data structures
+                self.heuristic_undo_tracker.append([0,0,0])
 
                 # remove a tile that is placed from the move order heuristic
                 # it is no longer a move that should be played
                 self.heuristic["move order"].remove(HeuristicTile(coord, 0))
+
+                # add to the heuristic undo tracker
+                self.heuristic_undo_tracker[-1][0] += 1
 
         return illegal
 
@@ -193,7 +196,9 @@ class BokuGame:
 
             # return the tile to the move order heuristic
             heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * -1)
-            self.heuristic["move order"].push(heuristic_tile) #TODO this is likely causing errors as this change is untracted
+            self.heuristic["move order"].push(heuristic_tile)
+
+            # add to the heuristic undo tracker
             self.heuristic_undo_tracker[-1][0] += 1
 
     @warn_if_called_outside_class
@@ -321,7 +326,8 @@ class BokuGame:
             self._capture_tile(capture, True)
 
             # update the heuristics
-            _, _ = self._win_capture_check(capture, color, False) #TODO this line is causing errors in the undo process
+            #TODO this line is causing errors in the undo process
+            #_, _ = self._win_capture_check(capture, color, False) 
 
         return illegal
 
@@ -408,12 +414,14 @@ class BokuGame:
             for _ in range(black):
                 self.heuristic["black"].undo()
 
+            # reset the winner
+            self.heuristic["winner"] = ""
+
         return action #TODO what is this for?
 
     def eval(self):
         """evaluate the game state and return a value"""
         #TODO this function should be replaced by different functions for different agents
-        #TODO win, draw lose should not be infinite, but a very high/low number number
         # return a value if not win
         if self.heuristic["winner"] == "":
             return round((self.heuristic["black"].total() - self.heuristic["white"].total()) * 1000)

@@ -12,7 +12,7 @@ def ab_negmax_random_capture(node: BokuGame,
     """negamax algorithm with alpha beta pruning"""
 
     ## Base Case: check if we are at a leaf node
-    # curusion depth is is reached or the game is over (win, lose, draw)
+    # recusion depth is is reached or the game is over (win, lose, draw)
     if depth == 0 or node.heuristic["winner"] != "":
         # the board reports the value according to white's perspective
         value = node.eval() if len(node.history) % 2 == 0 else -node.eval()

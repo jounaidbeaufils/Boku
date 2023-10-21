@@ -9,6 +9,8 @@ from bokuboard.sumtrackingdict import SumTrackingDictWithUndo
 from priorityq.mapped_queue import MappedQueueWithUndo
 from minmax.heuristictile import HeuristicTile
 
+from privatedebug.utils import warn_if_called_outside_class, restrict_to_class
+
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
@@ -36,6 +38,7 @@ class BokuGame:
         for coord, value in bokudata.centricity_values.items():
             self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
 
+    @restrict_to_class
     def _win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
@@ -76,7 +79,8 @@ class BokuGame:
                         value_dict[line_coords[s_l + t_n]] += value / counter
 
         return win, value_dict
-
+    
+    @restrict_to_class
     def _capture_check(self, coord: tuple, capture_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
@@ -127,8 +131,8 @@ class BokuGame:
                     capture_choice.add(line_coords[s_l + 2])
 
         return capture_choice, value_dict
-
-    def place_tile(self, coord, tile_color, write_history=True) -> bool:
+    @warn_if_called_outside_class
+    def _place_tile(self, coord, tile_color, write_history=True) -> bool:
         """places a tile, and then calls win check and capture check"""
 
         # check for if the tile is illegal
@@ -169,7 +173,7 @@ class BokuGame:
         #reset no_play_tile. it is only blocked for one play
         self.no_play_tile = tuple()
 
-
+    @warn_if_called_outside_class
     def capture_tile(self, tile, write_history=True):
         """captes the tile it recieved in paramaters and locks that tile"""
         #TODO consider making capture_check run heuristics.
@@ -188,8 +192,8 @@ class BokuGame:
             # add the removed tile on the latest turn's entry
             self.history[-1].append(tile)
 
-
-    def win_capture_check(self, coord, color, can_capture) -> tuple():
+    @warn_if_called_outside_class
+    def _win_capture_check(self, coord, color, can_capture) -> tuple():
         """runs all required heuristics that should be played when a move is played
         a move includes a tile placement and a capture, 
         the move is passed as the coord of the tile placed or captured.
@@ -227,7 +231,8 @@ class BokuGame:
 
         else:
             return False, set()
-
+    
+    @restrict_to_class
     def _heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
         """push heuristic values to the heuristic dicts"""
 
@@ -278,6 +283,43 @@ class BokuGame:
         color_pos = 1 if color == "white" else 2
         self.heuristic_undo_tracker[-1][color_pos] += color_changes
 
+    def play_tile(self, coord, color):
+        """play a tile, and then call win check and capture check
+            intended as a one move call for agents
+            making play_capture the only other call
+        """
+        illegal = True
+        win = False
+        capture_choice = set()
+
+        # attempt to play the tile
+        illegal = self._place_tile(coord, color)
+
+        if not illegal:
+            # check for win and capture, if the tile was placed
+            win, capture_choice = self._win_capture_check(coord, color, True)
+
+        return illegal, win, capture_choice
+
+    def play_capture(self, capture, capture_choice):
+        """play a capture, and then call win check and capture check
+            intended as a one move call for agents
+            making play_tile the only other call
+        """
+
+        illegal = True
+        # check if the capture is legal
+        if capture in capture_choice:
+            illegal = False
+
+            # perform legal capture
+            self.capture_tile(capture, True)
+
+            # update the heuristics
+            _, _ = self._win_capture_check(capture, "white", True)
+            _, _ = self._win_capture_check(capture, "black", True)
+
+        return illegal
 
     def draw_board(self):
         """draw the board"""
@@ -329,7 +371,7 @@ class BokuGame:
                 self.no_play_tile = tuple()
 
                 # replace the captured tile without writing to history
-                self.place_tile(captured,captured_color,False)
+                self._place_tile(captured,captured_color,False)
 
             else:
                 # set the placed tile
@@ -362,7 +404,7 @@ class BokuGame:
             for _ in range(black):
                 self.heuristic["black"].undo()
 
-        return action
+        return action #TODO what is this for?
 
     def eval(self):
         """evaluate the game state and return a value"""

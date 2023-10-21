@@ -12,7 +12,7 @@ while True:
         print("tile does not exist")
         continue 
 
-    result = game.place_tile(user_tile, user_player)
+    result = game._place_tile(user_tile, user_player)
     print(not result)
 
     for color in ["white", "black"]:

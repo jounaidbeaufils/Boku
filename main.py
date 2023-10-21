@@ -45,11 +45,11 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
     #starting board (for testing purposes)
     if random_start:
         first_move = choice(list(bokudata.all_coords))
-        game.place_tile(first_move, "white")
+        game._place_tile(first_move, "white")
         game.heuristic["move order"].remove(HeuristicTile(first_move, 0))
 
         second_move = choice(list(bokudata.all_coords - {first_move}))
-        game.place_tile(second_move, "black")
+        game._place_tile(second_move, "black")
         game.heuristic["move order"].remove(HeuristicTile(second_move, 0))
 
     # pleyers out of options

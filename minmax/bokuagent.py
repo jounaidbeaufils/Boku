@@ -39,10 +39,10 @@ class RandomAgent(BokuAgent):
         move = valid_moves[move_index]
 
         # play the move
-        game.place_tile(move, self.color)
+        game._place_tile(move, self.color)
 
         # combined heuristic, win and capture check
-        win, capture_choice = game.win_capture_check(move, self.color, True)
+        win, capture_choice = game._win_capture_check(move, self.color, True)
 
         if capture_choice:
             capture = choice(list(capture_choice))
@@ -70,7 +70,7 @@ class HumanAgent(BokuAgent):
                 print(f"the tile '{tile_notation}' does not exist")
                 continue
 
-            illegal_move = game.place_tile(tile_coord, self.color)
+            illegal_move = game._place_tile(tile_coord, self.color)
 
             # report if move is illegal and skip to next iteration
             if illegal_move:
@@ -80,7 +80,7 @@ class HumanAgent(BokuAgent):
             valid_play = True
 
             # check for captures
-            win, capture_choice = game.win_capture_check(tile_coord, self.color, True)
+            win, capture_choice = game._win_capture_check(tile_coord, self.color, True)
             if capture_choice:
                 illegal_capture = True
                 while illegal_capture:
@@ -114,13 +114,13 @@ class HeuristicAgent(BokuAgent):
                     break
 
             # play the move
-            illegal = game.place_tile(move_coord, self.color)
+            illegal = game._place_tile(move_coord, self.color)
             if illegal:
                 print("the move is illegal")
                 continue
 
             # combined heuristic, win and capture check
-            win, capture_choice = game.win_capture_check(move_coord, self.color, True)
+            win, capture_choice = game._win_capture_check(move_coord, self.color, True)
 
             if capture_choice:
                 notation_list = [coord_to_notation(coord) for coord in capture_choice]
@@ -155,10 +155,10 @@ class ABNMAgentRandomCapture(BokuAgent):
         move, _ = ab_negmax_random_capture(node=game, depth=self.depth)
 
         # play the move
-        game.place_tile(move, self.color)
+        game._place_tile(move, self.color)
 
         # combined heuristic, win and capture check
-        win, capture_choice = game.win_capture_check(move, self.color, True)
+        win, capture_choice = game._win_capture_check(move, self.color, True)
 
         if win:
             return win, move

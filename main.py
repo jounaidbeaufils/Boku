@@ -3,6 +3,7 @@ from random import choice
 
 from bokuboard import bokudata
 from bokuboard.bokulogic import BokuGame
+from bokuboard.bokudata import coord_to_notation
 from minmax.bokuagent import (BokuAgent, RandomAgent, HumanAgent, HeuristicAgent,
                              ABNMAgentRandomCapture)
 from minmax.heuristictile import HeuristicTile
@@ -78,7 +79,7 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
 
         else:
             #TODO print capture move correctly, read history
-            print(f"{player.color} plays {game.coord_to_notation(move)}")
+            print(f"{player.color} plays {coord_to_notation(move)}")
 
         # check if the playing player has won
         if win:
@@ -111,12 +112,12 @@ def run_command(command: str, game: BokuGame):
             "display" : game.draw_board,
             # i don't want to declare a wrapper function
             # this list comprehension converts from coordinates to notation
-            "history" : lambda: print([[game.coord_to_notation(coord) for coord in action]\
+            "history" : lambda: print([[coord_to_notation(coord) for coord in action]\
                                         for action in game.history]),
             "occupied": lambda: print(game.occupied_dict),
             "heuristic": lambda: print(game.heuristic[input("enter color: ")]),
             "undo tracker": lambda: print(game.heuristic_undo_tracker),
-            "no play": lambda: print(game.coord_to_notation(game.no_play_tile)),
+            "no play": lambda: print(coord_to_notation(game.no_play_tile)),
         }
         if command not in command_dict:
             print(f"command '{command}' is not a valid command")

@@ -384,6 +384,8 @@ class BokuGame:
     @staticmethod
     def notation_to_coord(notation: str):
         """will return (-99, -99, -99) if the notation is invalid"""
+        raise DeprecationWarning(
+            "this function is deprecated, use bokudata.notation_to_coord instead")
 
         coord = [-99, -99, -99]
         if notation.upper() in bokudata.valid_notation:
@@ -400,6 +402,8 @@ class BokuGame:
     @staticmethod
     def coord_to_notation(coord):
         """will return an empty string if the coord is not on the boord"""
+        raise DeprecationWarning(
+            "this function is deprecated, use bokudata.coord_to_notation instead")
 
         notation = ""
         if coord in bokudata.all_coords:

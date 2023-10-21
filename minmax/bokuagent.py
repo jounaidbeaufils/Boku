@@ -3,6 +3,7 @@ from random import randint, choice
 
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
+from bokuboard.bokudata import coord_to_notation, notation_to_coord
 from minmax.minmaxalgo import ab_negmax_random_capture
 
 @abstractmethod
@@ -46,7 +47,7 @@ class RandomAgent(BokuAgent):
         if capture_choice:
             capture = choice(list(capture_choice))
             game.capture_tile(capture)
-            print(f"{self.color} RandomAgent captures {game.coord_to_notation(capture)}")
+            print(f"{self.color} RandomAgent captures {coord_to_notation(capture)}")
 
         return win, move
 
@@ -62,7 +63,7 @@ class HumanAgent(BokuAgent):
             tile_notation = input(f"which tile does {self.color.upper()} place? ")
 
             # translate notation
-            tile_coord = game.notation_to_coord(tile_notation)
+            tile_coord = notation_to_coord(tile_notation)
 
             # avoid invalid tile notations
             if tile_coord == (-99, -99, -99):
@@ -83,10 +84,10 @@ class HumanAgent(BokuAgent):
             if capture_choice:
                 illegal_capture = True
                 while illegal_capture:
-                    notation_list = [game.coord_to_notation(coord) for coord in capture_choice]
+                    notation_list = [coord_to_notation(coord) for coord in capture_choice]
                     capture = input(
                         f"which tile does {self.color.upper()} capture from {notation_list}? ")
-                    capture = game.notation_to_coord(capture)
+                    capture = notation_to_coord(capture)
                     if capture in capture_choice:
                         illegal_capture =False
                         game.capture_tile(capture)
@@ -122,13 +123,13 @@ class HeuristicAgent(BokuAgent):
             win, capture_choice = game.heuristic_check(move_coord, self.color, True)
 
             if capture_choice:
-                notation_list = [game.coord_to_notation(coord) for coord in capture_choice]
+                notation_list = [coord_to_notation(coord) for coord in capture_choice]
                 print(f"{self.color} can capture from:{notation_list}")
 
                 # capture at random because occupied tiles don't have a heuristic
                 capture = choice(list(capture_choice))
                 game.capture_tile(capture)
-                print(f"{self.color} HeuristicAgent captures {game.coord_to_notation(capture)}")
+                print(f"{self.color} HeuristicAgent captures {coord_to_notation(capture)}")
 
         if illegal:
             print(f"{self.color} HeuristicAgent has no legal moves left")
@@ -167,6 +168,6 @@ class ABNMAgentRandomCapture(BokuAgent):
             # play a random capture
             capture = choice(list(capture_choice))
             game.capture_tile(capture)
-            print(f"{self.color} ABNMAgentRandomCapture captures {game.coord_to_notation(capture)}")
+            print(f"{self.color} ABNMAgentRandomCapture captures {coord_to_notation(capture)}")
 
         return win, move

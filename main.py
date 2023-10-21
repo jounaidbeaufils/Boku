@@ -6,7 +6,6 @@ from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation
 from minmax.bokuagent import (BokuAgent, RandomAgent, HumanAgent, HeuristicAgent,
                              ABNMAgentRandomCapture)
-from minmax.heuristictile import HeuristicTile
 
 def play_x_games(x=None, white=None, black=None, promt_cycle=None, random_start=None):
     """plays x games of boku"""
@@ -45,12 +44,10 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
     #starting board (for testing purposes)
     if random_start:
         first_move = choice(list(bokudata.all_coords))
-        game._place_tile(first_move, "white")
-        game.heuristic["move order"].remove(HeuristicTile(first_move, 0))
+        game.play_tile(first_move, "white")
 
         second_move = choice(list(bokudata.all_coords - {first_move}))
-        game._place_tile(second_move, "black")
-        game.heuristic["move order"].remove(HeuristicTile(second_move, 0))
+        game.play_tile(second_move, "black")
 
     # pleyers out of options
     white_out = False

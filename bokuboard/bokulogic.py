@@ -181,9 +181,6 @@ class BokuGame:
     @warn_if_called_outside_class
     def _capture_tile(self, tile, write_history=True):
         """captes the tile it recieved in paramaters and locks that tile"""
-        #TODO consider making capture_check run heuristics.
-        # however heuristics are currently called by Agents
-        # wrapper functions for play_tile and play_capture should be made
 
         # move the tile from occupied to open
         self.occupied_dict[tile] = "free"
@@ -320,7 +317,7 @@ class BokuGame:
         # check if the capture is legal
         if capture in capture_choice:
             illegal = False
-            color = "white" if len(self.history) % 2 == 0 else "black"
+            #color = "white" if len(self.history) % 2 == 0 else "black"
 
             # perform legal capture
             self._capture_tile(capture, True)
@@ -416,8 +413,6 @@ class BokuGame:
 
             # reset the winner
             self.heuristic["winner"] = ""
-
-        return action #TODO what is this for?
 
     def eval(self):
         """evaluate the game state and return a value"""

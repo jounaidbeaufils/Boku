@@ -11,16 +11,17 @@ def ab_negmax_random_capture(node: BokuGame,
                              beta: int=float('inf')):
     """negamax algorithm with alpha beta pruning"""
 
-    # Base Case: check if we are at a leaf node
+    ## Base Case: check if we are at a leaf node
     # curusion depth is is reached or the game is over (win, lose, draw)
     if depth == 0 or node.heuristic["winner"] != "":
         # the board reports the value according to white's perspective
         value = node.eval() if len(node.history) % 2 == 0 else -node.eval()
         return node.history[-1][0], value
+
+    ## Recursion Case:
+    # initialize the best move, score and the color of the player to play
     score = float('-inf')
     best_move = None
-
-    # get the color of the player to play
     color = "white" if len(node.history) % 2 == 0 else "black"
 
     # go through all the children (moves) by iterating the move order priorityq
@@ -62,4 +63,6 @@ def ab_negmax_random_capture(node: BokuGame,
         if score >= beta:
             break
 
+    if best_move is None:
+        print(f"abnm did not find a move, prioritq length is {len(node.heuristic['move order'])}")
     return best_move, score

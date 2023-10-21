@@ -131,6 +131,7 @@ class BokuGame:
                     capture_choice.add(line_coords[s_l + 2])
 
         return capture_choice, value_dict
+    
     @warn_if_called_outside_class
     def _place_tile(self, coord, tile_color, write_history=True) -> bool:
         """places a tile, and then calls win check and capture check"""
@@ -160,6 +161,7 @@ class BokuGame:
                 self.heuristic["move order"].remove(HeuristicTile(coord, 0))
 
         return illegal
+
     def skip_turn(self):
         """skips the turn of the player who's turn it is"""
         # consider adding two skip turns to the move order heuristic
@@ -183,14 +185,16 @@ class BokuGame:
         # move the tile from occupied to open
         self.occupied_dict[tile] = "free"
 
-        # return the tile to the move order heuristic
-        heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * -1)
-        self.heuristic["move order"].push(heuristic_tile)
-
         # write move to history
         if write_history:
+
             # add the removed tile on the latest turn's entry
             self.history[-1].append(tile)
+
+            # return the tile to the move order heuristic
+            heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * -1)
+            self.heuristic["move order"].push(heuristic_tile) #TODO this is likely causing errors as this change is untracted
+            self.heuristic_undo_tracker[-1][0] += 1
 
     @warn_if_called_outside_class
     def _win_capture_check(self, coord, color, can_capture) -> tuple():
@@ -213,7 +217,7 @@ class BokuGame:
             self.heuristic["winner"] = color
             return color_win, set()
 
-        # check for win by the oppositit player
+        # check for win by the opposite player
         #TODO improve heuristic accuracy with update order and potentially recursion
         _, opp_win_dict = self._win_check(coord, opp_color)
 
@@ -311,13 +315,13 @@ class BokuGame:
         # check if the capture is legal
         if capture in capture_choice:
             illegal = False
+            color = "white" if len(self.history) % 2 == 0 else "black"
 
             # perform legal capture
             self._capture_tile(capture, True)
 
             # update the heuristics
-            _, _ = self._win_capture_check(capture, "white", True)
-            _, _ = self._win_capture_check(capture, "black", True)
+            _, _ = self._win_capture_check(capture, color, False) #TODO this line is causing errors in the undo process
 
         return illegal
 
@@ -416,8 +420,14 @@ class BokuGame:
 
         # return a value for white win
         if self.heuristic["winner"] == "white":
-            return float("inf")
+            return 100000
+        
+        # return a value for white loss
+        if self.heuristic["winner"] == "black":
+            return -100000
+        
+        # return a value for draw
+        else:
+            return 90000
 
-        # return a value for white loss or draw
-        return float("-inf")
   

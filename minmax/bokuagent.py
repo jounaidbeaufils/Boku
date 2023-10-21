@@ -42,7 +42,7 @@ class RandomAgent(BokuAgent):
         game.place_tile(move, self.color)
 
         # combined heuristic, win and capture check
-        win, capture_choice = game.heuristic_check(move, self.color, True)
+        win, capture_choice = game.win_capture_check(move, self.color, True)
 
         if capture_choice:
             capture = choice(list(capture_choice))
@@ -80,7 +80,7 @@ class HumanAgent(BokuAgent):
             valid_play = True
 
             # check for captures
-            win, capture_choice = game.heuristic_check(tile_coord, self.color, True)
+            win, capture_choice = game.win_capture_check(tile_coord, self.color, True)
             if capture_choice:
                 illegal_capture = True
                 while illegal_capture:
@@ -120,7 +120,7 @@ class HeuristicAgent(BokuAgent):
                 continue
 
             # combined heuristic, win and capture check
-            win, capture_choice = game.heuristic_check(move_coord, self.color, True)
+            win, capture_choice = game.win_capture_check(move_coord, self.color, True)
 
             if capture_choice:
                 notation_list = [coord_to_notation(coord) for coord in capture_choice]
@@ -158,7 +158,7 @@ class ABNMAgentRandomCapture(BokuAgent):
         game.place_tile(move, self.color)
 
         # combined heuristic, win and capture check
-        win, capture_choice = game.heuristic_check(move, self.color, True)
+        win, capture_choice = game.win_capture_check(move, self.color, True)
 
         if win:
             return win, move

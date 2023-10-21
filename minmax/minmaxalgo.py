@@ -34,7 +34,7 @@ def ab_negmax_random_capture(node: BokuGame,
 
         # run heuristic check to see if there is a capture
         #TODO a win can be detected here, should it?
-        _, capture_choice = node.heuristic_check(move.tile, color, True)
+        _, capture_choice = node.win_capture_check(move.tile, color, True)
 
         # check if there is a capture
         if capture_choice:

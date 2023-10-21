@@ -12,8 +12,6 @@ from minmax.heuristictile import HeuristicTile
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
-    #TODO combined function to play and report wins, what about captures?
-    #TODO rename private methods
     def __init__(self):
         self.occupied_dict = {coord : "free" for coord in bokudata.all_coords}
         self.no_play_tile = tuple()
@@ -38,7 +36,7 @@ class BokuGame:
         for coord, value in bokudata.centricity_values.items():
             self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
 
-    def win_check(self, coord: tuple, win_color: str):
+    def _win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
@@ -79,7 +77,7 @@ class BokuGame:
 
         return win, value_dict
 
-    def capture_check(self, coord: tuple, capture_color: str):
+    def _capture_check(self, coord: tuple, capture_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
 
@@ -191,7 +189,7 @@ class BokuGame:
             self.history[-1].append(tile)
 
 
-    def heuristic_check(self, coord, color, can_capture) -> tuple():
+    def win_capture_check(self, coord, color, can_capture) -> tuple():
         """runs all required heuristics that should be played when a move is played
         a move includes a tile placement and a capture, 
         the move is passed as the coord of the tile placed or captured.
@@ -204,7 +202,7 @@ class BokuGame:
         opp_color = "white" if color == "black" else "black"
 
         # check for win by the player who just moved
-        color_win, color_win_dict = self.win_check(coord, color)
+        color_win, color_win_dict = self._win_check(coord, color)
 
         # early exit out of heuristic when a game is won
         if can_capture and color_win:
@@ -213,15 +211,15 @@ class BokuGame:
 
         # check for win by the oppositit player
         #TODO improve heuristic accuracy with update order and potentially recursion
-        _, opp_win_dict = self.win_check(coord, opp_color)
+        _, opp_win_dict = self._win_check(coord, opp_color)
 
         # check for captures after a capture, to update the heuristic
-        color_choice, color_capture_dict = self.capture_check(coord, color)
-        _, opp_capture_dict = self.capture_check(coord, opp_color)
+        color_choice, color_capture_dict = self._capture_check(coord, color)
+        _, opp_capture_dict = self._capture_check(coord, opp_color)
 
         # update the heuristics
-        self.heuristic_update(color_capture_dict, color_win_dict, color)
-        self.heuristic_update(opp_capture_dict, opp_win_dict, opp_color)
+        self._heuristic_update(color_capture_dict, color_win_dict, color)
+        self._heuristic_update(opp_capture_dict, opp_win_dict, opp_color)
 
         # return the win state (false) and capture choices
         if can_capture:
@@ -230,7 +228,7 @@ class BokuGame:
         else:
             return False, set()
 
-    def heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
+    def _heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
         """push heuristic values to the heuristic dicts"""
 
         # set default weights
@@ -369,6 +367,7 @@ class BokuGame:
     def eval(self):
         """evaluate the game state and return a value"""
         #TODO this function should be replaced by different functions for different agents
+        #TODO win, draw lose should not be infinite, but a very high/low number number
         # return a value if not win
         if self.heuristic["winner"] == "":
             return round((self.heuristic["black"].total() - self.heuristic["white"].total()) * 1000)

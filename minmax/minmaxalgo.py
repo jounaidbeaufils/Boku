@@ -30,17 +30,14 @@ def ab_negmax_random_capture(node: BokuGame,
             continue
 
         # play the move (generate the successor state)
-        node._place_tile(move.tile, color)
-
-        # run heuristic check to see if there is a capture
         #TODO a win can be detected here, should it?
-        _, capture_choice = node._win_capture_check(move.tile, color, True)
+        _, _, capture_choice = node.play_tile(move.tile, color)
 
         # check if there is a capture
         if capture_choice:
             # randomly capture
             capture = choice(list(capture_choice))
-            node.capture_tile(capture)
+            node.play_capture(capture, capture_choice)
 
         # call negamax on the successor state, flip the signs
         _, value = ab_negmax_random_capture(node, depth - 1, -beta, -alpha)

@@ -174,7 +174,7 @@ class BokuGame:
         self.no_play_tile = tuple()
 
     @warn_if_called_outside_class
-    def capture_tile(self, tile, write_history=True):
+    def _capture_tile(self, tile, write_history=True):
         """captes the tile it recieved in paramaters and locks that tile"""
         #TODO consider making capture_check run heuristics.
         # however heuristics are currently called by Agents
@@ -313,7 +313,7 @@ class BokuGame:
             illegal = False
 
             # perform legal capture
-            self.capture_tile(capture, True)
+            self._capture_tile(capture, True)
 
             # update the heuristics
             _, _ = self._win_capture_check(capture, "white", True)
@@ -385,7 +385,7 @@ class BokuGame:
             if tile != "":
                 # remove the tile played using capture without writing to history
                 # write_history=False also disables the tile lock
-                self.capture_tile(tile, False)
+                self._capture_tile(tile, False)
 
 
             ## undo the changes to the heuristics

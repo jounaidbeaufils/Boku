@@ -39,14 +39,14 @@ class RandomAgent(BokuAgent):
         move = valid_moves[move_index]
 
         # play the move
-        game._place_tile(move, self.color)
+        _, win, capture_choice = game.play_tile(move, self.color)
 
-        # combined heuristic, win and capture check
-        win, capture_choice = game._win_capture_check(move, self.color, True)
-
+        # check if there is a capture
         if capture_choice:
+            # play a random capture
             capture = choice(list(capture_choice))
-            game.capture_tile(capture)
+            game.play_capture(capture, capture_choice)
+            # TODO remove prints and read from history in main
             print(f"{self.color} RandomAgent captures {coord_to_notation(capture)}")
 
         return win, move
@@ -70,17 +70,16 @@ class HumanAgent(BokuAgent):
                 print(f"the tile '{tile_notation}' does not exist")
                 continue
 
-            illegal_move = game._place_tile(tile_coord, self.color)
+            # play the tile
+            illegal, win, capture_choice = game.play_tile(tile_coord, self.color)
 
             # report if move is illegal and skip to next iteration
-            if illegal_move:
+            if illegal:
                 print(f"move '{tile_notation}' is not allowed")
                 continue
 
             valid_play = True
 
-            # check for captures
-            win, capture_choice = game._win_capture_check(tile_coord, self.color, True)
             if capture_choice:
                 illegal_capture = True
                 while illegal_capture:
@@ -88,9 +87,7 @@ class HumanAgent(BokuAgent):
                     capture = input(
                         f"which tile does {self.color.upper()} capture from {notation_list}? ")
                     capture = notation_to_coord(capture)
-                    if capture in capture_choice:
-                        illegal_capture =False
-                        game.capture_tile(capture)
+                    illegal_capture = game.play_capture(capture, capture_choice)
 
         return win, tile_coord #TODO set up human skipping turn
 
@@ -114,13 +111,10 @@ class HeuristicAgent(BokuAgent):
                     break
 
             # play the move
-            illegal = game._place_tile(move_coord, self.color)
+            illegal, win, capture_choice = game.play_tile(move_coord, self.color)
             if illegal:
                 print("the move is illegal")
                 continue
-
-            # combined heuristic, win and capture check
-            win, capture_choice = game._win_capture_check(move_coord, self.color, True)
 
             if capture_choice:
                 notation_list = [coord_to_notation(coord) for coord in capture_choice]
@@ -128,9 +122,10 @@ class HeuristicAgent(BokuAgent):
 
                 # capture at random because occupied tiles don't have a heuristic
                 capture = choice(list(capture_choice))
-                game.capture_tile(capture)
+                game.play_capture(capture, capture_choice)
                 print(f"{self.color} HeuristicAgent captures {coord_to_notation(capture)}")
 
+        # TODO implement turn skipping, properly
         if illegal:
             print(f"{self.color} HeuristicAgent has no legal moves left")
             game.skip_turn()
@@ -155,10 +150,7 @@ class ABNMAgentRandomCapture(BokuAgent):
         move, _ = ab_negmax_random_capture(node=game, depth=self.depth)
 
         # play the move
-        game._place_tile(move, self.color)
-
-        # combined heuristic, win and capture check
-        win, capture_choice = game._win_capture_check(move, self.color, True)
+        _, win, capture_choice = game.play_tile(move, self.color)
 
         if win:
             return win, move
@@ -167,7 +159,7 @@ class ABNMAgentRandomCapture(BokuAgent):
         if capture_choice:
             # play a random capture
             capture = choice(list(capture_choice))
-            game.capture_tile(capture)
+            game.play_capture(capture, capture_choice)
             print(f"{self.color} ABNMAgentRandomCapture captures {coord_to_notation(capture)}")
 
         return win, move

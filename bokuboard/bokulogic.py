@@ -302,7 +302,7 @@ class BokuGame:
                                       orientation=np.radians(30), facecolor=color,
                                       alpha=0.3, edgecolor='k')
             ax.add_patch(hexagon)
-            ax.text(x, y, self.coord_to_notation(coord), ha='center', va='center', fontsize=10)
+            ax.text(x, y, bokudata.coord_to_notation(coord), ha='center', va='center', fontsize=10)
 
         # Also add scatter points in hexagon centers ###remove?###
         ax.scatter(hcoord, vcoord, alpha=0.0)
@@ -379,39 +379,4 @@ class BokuGame:
 
         # return a value for white loss or draw
         return float("-inf")
-
-
-    @staticmethod
-    def notation_to_coord(notation: str):
-        """will return (-99, -99, -99) if the notation is invalid"""
-        raise DeprecationWarning(
-            "this function is deprecated, use bokudata.notation_to_coord instead")
-
-        coord = [-99, -99, -99]
-        if notation.upper() in bokudata.valid_notation:
-            letter = notation[0].upper()
-            coord[2] = -(ord(letter) - ord('A'))
-
-            number = notation[1:]
-            coord[1] = int(number) -1
-
-            coord[0] = 1 - int(number) - coord[2]
-
-        return tuple(coord)
-
-    @staticmethod
-    def coord_to_notation(coord):
-        """will return an empty string if the coord is not on the boord"""
-        raise DeprecationWarning(
-            "this function is deprecated, use bokudata.coord_to_notation instead")
-
-        notation = ""
-        if coord in bokudata.all_coords:
-            notation = ""
-            alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-            notation += alpha[-coord[2]]
-            notation += str(coord[1] + 1)
-
-        return notation
   

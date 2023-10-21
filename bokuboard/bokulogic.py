@@ -257,7 +257,7 @@ class BokuGame:
             # add the centricity value to the capture value
             combined_value_dict[key] += self.heuristic["centricity"][key] * weights["centricity"]
 
-            # flip heuristic sign
+            # flip heuristic sign, because the priorityq is a min queue
             combined_value_dict[key] *= -1
 
         # update the heuristics

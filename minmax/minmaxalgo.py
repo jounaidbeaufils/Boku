@@ -3,6 +3,7 @@
 from random import choice
 
 from bokuboard.bokulogic import BokuGame
+from bokuboard.bokudata import coord_to_notation
 
 def ab_negmax_random_capture(node: BokuGame,
                              depth: int,
@@ -31,7 +32,12 @@ def ab_negmax_random_capture(node: BokuGame,
 
         # play the move (generate the successor state)
         #TODO a win can be detected here, should it?
-        _, _, capture_choice = node.play_tile(move.tile, color)
+        ilegal, _, capture_choice = node.play_tile(move.tile, color)
+
+        # TODO this check should not be necessary, fix the priorityq containing occupied tiles
+        if ilegal:
+            print(f"{color} abnm investigated an illegal move {coord_to_notation(move.tile)}")
+            continue
 
         # check if there is a capture
         if capture_choice:

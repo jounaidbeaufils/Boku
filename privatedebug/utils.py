@@ -14,7 +14,7 @@ def warn_if_called_outside_class(func):
             if outer_frame.f_globals['__name__'] != self.__class__.__module__ or \
                outer_frame.f_locals.get('self', None).__class__ != self.__class__:
                 warnings.warn(
-                    f"{func.__class__}.{func.__name__} should ideally not be called outside of its class", 
+                    f"{func.__class__}.{func.__name__} should not be called outside of its class", 
                     RuntimeWarning)
             return func(self, *args, **kwargs)
         finally:
@@ -33,7 +33,8 @@ def restrict_to_class(func):
             outer_frame = frame.f_back
             if outer_frame.f_globals['__name__'] != self.__class__.__module__ or \
                outer_frame.f_locals.get('self', None).__class__ != self.__class__:
-                raise RuntimeError(f"{func.__class__}.{func.__name__} should not be called outside of its class")
+                raise RuntimeError(
+                    f"{func.__class__}.{func.__name__} should not be called outside of its class")
             return func(self, *args, **kwargs)
         finally:
             # Avoid reference cycles

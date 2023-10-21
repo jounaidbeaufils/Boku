@@ -79,7 +79,7 @@ class BokuGame:
                         value_dict[line_coords[s_l + t_n]] += value / counter
 
         return win, value_dict
-    
+
     @restrict_to_class
     def _capture_check(self, coord: tuple, capture_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
@@ -231,7 +231,7 @@ class BokuGame:
 
         else:
             return False, set()
-    
+
     @restrict_to_class
     def _heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
         """push heuristic values to the heuristic dicts"""

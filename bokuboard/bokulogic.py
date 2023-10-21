@@ -131,7 +131,7 @@ class BokuGame:
                     capture_choice.add(line_coords[s_l + 2])
 
         return capture_choice, value_dict
-    
+
     @warn_if_called_outside_class
     def _place_tile(self, coord, tile_color, write_history=True) -> bool:
         """places a tile, and then calls win check and capture check"""
@@ -327,7 +327,7 @@ class BokuGame:
 
             # update the heuristics
             #TODO this line is causing errors in the undo process
-            #_, _ = self._win_capture_check(capture, color, False) 
+            #_, _ = self._win_capture_check(capture, color, False)
 
         return illegal
 
@@ -429,13 +429,11 @@ class BokuGame:
         # return a value for white win
         if self.heuristic["winner"] == "white":
             return 100000
-        
+
         # return a value for white loss
         if self.heuristic["winner"] == "black":
             return -100000
-        
+
         # return a value for draw
         else:
             return 90000
-
-  

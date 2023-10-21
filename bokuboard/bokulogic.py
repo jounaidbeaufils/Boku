@@ -326,7 +326,7 @@ class BokuGame:
             self._capture_tile(capture, True)
 
             # update the heuristics
-            #TODO this line is causing errors in the undo process
+            #TODO this line is causes am odd artifact where abnm will attempt to play to no tile
             #_, _ = self._win_capture_check(capture, color, False)
 
         return illegal

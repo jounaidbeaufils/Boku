@@ -12,10 +12,9 @@ while True:
     user_tile = notation_to_coord(user_tile)
     if user_tile == (-99,-99,-99):
         print("tile does not exist")
-        continue 
+        continue
 
-    result = game._place_tile(user_tile, user_player)
-    print(not result)
+    game._place_tile(user_tile, user_player)
 
     win, values = game._win_check(user_tile, user_player)
     if win:

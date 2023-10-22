@@ -41,7 +41,7 @@ def play_x_games(x=None, white: BokuAgent=None, black: BokuAgent=None,
 
     print(f"{game_log}")
 
-def start_game(game_n, players, promt_cycle, game_log, random_start, **kwargs):
+def start_game(game_n, players, promt_cycle, game_log, random_start):
     """This methods starts a game of boku"""
 
     # initialize game

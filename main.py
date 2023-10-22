@@ -56,48 +56,49 @@ def start_game(game_n, players, promt_cycle, game_log, random_start):
         second_move = choice(list(bokudata.all_coords - {first_move}))
         game.play_tile(second_move, "black")
 
-    # pleyers out of options
-    white_out = False
-    black_out = False
-
     #Play the game
     last_turn = -1
+    last_game_balance = 0
     while game_on:
     # check player to play
         turn = len(game.history) // 2
         if last_turn != turn:
             last_turn = turn
-            game_balance = game.eval()
-            print(f"\ngame: {game_n}, turn: {turn},  game balance: {game_balance} ")
+            print(f"\ngame: {game_n}, turn: {turn},  game balance: {last_game_balance} ")
 
         player = players[len(game.history) % 2]
-        win, move = player.play(game)
+        _, move = player.play(game)
 
-        # check if player is out of options
-        if move is None and player.color == "white":
-            print("white has no legal moves")
-            white_out = True
-        elif move is None and player.color == "black":
-            print("black has no legal moves")
-            black_out = True
+        # check that the move is legal, and was played
+        if game.history[-1][0] == move:
+            capture_sentense = ""
 
-        else:
-            #TODO print capture move correctly, read history
-            print(f"{player.color} plays {coord_to_notation(move)}")
+            # check if there is a capture
+            if len(game.history[-1]) > 1:
+                capture_sentense = f" and captures {coord_to_notation(game.history[-1][1])}"
+
+            # print the move and possible capture
+            # TODO get skip move sorted in all Agents
+            move_str = "skip" if move == "skip" else coord_to_notation(move)
+            print(f"{player.color} plays {move_str}{capture_sentense}")
 
         # check if the playing player has won
-        if win:
-            print(f"{player.color} has won the game!")
+        game_balance = game.eval()
+        if game.heuristic["winner"] in {"white", "black"}:
+            print(f"{game.heuristic['winner']} has won the game!")
             game_on = False
-            suprise = game_balance > 0 and player.color == "black"\
-                    or game_balance < 0 and player.color == "white"
+            suprise = last_game_balance > 0 and player.color == "black"\
+                    or last_game_balance < 0 and player.color == "white"
             game_log[f"{player.color} {'suprise ' if suprise else ''}win"] += 1
 
         # check if the game is a draw
-        if white_out and black_out:
+        if game.heuristic["winner"] == "draw":
             print("the game is a draw")
             game_on = False
             game_log["draw"] += 1
+
+        # update last game balance
+        last_game_balance = game_balance
 
         # run command opportunity at interval
         if ((turn + 1) % promt_cycle == 0 and player.color == "black") or not game_on:

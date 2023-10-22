@@ -168,7 +168,7 @@ class BokuGame:
         # consider adding two skip turns to the move order heuristic
 
         # write history as empty turn
-        self.history.append([""])
+        self.history.append(["skip"])
 
         # ensuring that when a move is undone the right number of heuristic changes have been undone
         self.heuristic_undo_tracker.append([0,0,0])
@@ -387,6 +387,12 @@ class BokuGame:
     def eval(self):
         """evaluate the game state and return a value"""
         #TODO !this function should be replaced by different functions for different agents
+        # check for a draw
+        if self.history[-1][0] == "" and self.history[-2][0] == "":
+            self.heuristic["winner"] = "draw"
+            #in favor of white, as always. but not as bad/good as a white win
+            return 90000 #90k
+
         # return a value if not win
         if self.heuristic["winner"] == "":
             white_len = len(self.heuristic["white"])
@@ -400,12 +406,8 @@ class BokuGame:
 
         # return a value for white win
         if self.heuristic["winner"] == "white":
-            return 100000
+            return 100000 #100k
 
         # return a value for white loss
         if self.heuristic["winner"] == "black":
-            return -100000
-
-        # return a value for draw
-        else:
-            return 90000
+            return -100000 #-100k

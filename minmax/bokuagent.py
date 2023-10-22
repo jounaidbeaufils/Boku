@@ -63,7 +63,7 @@ class HumanAgent(BokuAgent):
             tile_notation = input(f"which tile does {self.color.upper()} place? ")
             if tile_notation == "skip":
                 game.skip_turn()
-                return False, None
+                return False, "skip"
 
             # translate notation
             tile_coord = notation_to_coord(tile_notation)

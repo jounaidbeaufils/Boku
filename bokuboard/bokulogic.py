@@ -221,7 +221,7 @@ class BokuGame:
             return color_win, set()
 
         # check for win by the opposite player
-        #TODO improve heuristic accuracy with update order and potentially recursion
+        #TODO !improve heuristic accuracy with recursion, would ensure every value is accurate
         _, opp_win_dict = self._win_check(coord, opp_color)
 
         # check for captures after a capture, to update the heuristic
@@ -352,9 +352,8 @@ class BokuGame:
             ax.add_patch(hexagon)
             ax.text(x, y, bokudata.coord_to_notation(coord), ha='center', va='center', fontsize=10)
 
-        # Also add scatter points in hexagon centers
-        # TODO this line is technically useless but the board doesn't print ptoperly without it
-        # alpha set to 0.0 as a hack to hide the scatter points
+        # add scatter points in hexagon centers, to ensure all hexagons are in the plot zoom range
+        # TODO !fix this ploting hack
         ax.scatter(hcoord, vcoord, alpha=0.0)
 
         plt.show(block=False)
@@ -419,7 +418,7 @@ class BokuGame:
 
     def eval(self):
         """evaluate the game state and return a value"""
-        #TODO this function should be replaced by different functions for different agents
+        #TODO !this function should be replaced by different functions for different agents
         # return a value if not win
         if self.heuristic["winner"] == "":
             white_len = len(self.heuristic["white"])

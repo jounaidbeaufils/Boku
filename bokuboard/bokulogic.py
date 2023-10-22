@@ -221,7 +221,7 @@ class BokuGame:
         self._heuristic_update(color_capture_dict, color_win_dict, color)
         self._heuristic_update(opp_capture_dict, opp_win_dict, opp_color)
 
-        # return the win state (false) and capture choices 
+        # return the win state (false) and capture choices
         return color_win, color_choice
 
     def _heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):

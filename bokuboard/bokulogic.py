@@ -352,7 +352,9 @@ class BokuGame:
             ax.add_patch(hexagon)
             ax.text(x, y, bokudata.coord_to_notation(coord), ha='center', va='center', fontsize=10)
 
-        # Also add scatter points in hexagon centers ###remove?###
+        # Also add scatter points in hexagon centers
+        # TODO this line is technically useless but the board doesn't print ptoperly without it
+        # alpha set to 0.0 as a hack to hide the scatter points
         ax.scatter(hcoord, vcoord, alpha=0.0)
 
         plt.show(block=False)
@@ -420,8 +422,8 @@ class BokuGame:
         #TODO this function should be replaced by different functions for different agents
         # return a value if not win
         if self.heuristic["winner"] == "":
-            white_score = self.heuristic["white"].total() / len(self.heuristic["white"])
-            black_score = self.heuristic["black"].total() / len(self.heuristic["black"])
+            white_score = self.heuristic["white"].total() / len(self.heuristic["white"]) if len(self.heuristic["white"]) > 0 else 0
+            black_score = self.heuristic["black"].total() / len(self.heuristic["black"]) if len(self.heuristic["black"]) > 0 else 0
 
             # black - white is not a misake, the heuristic is more accurate that way
             return round((black_score - white_score) * 1000)

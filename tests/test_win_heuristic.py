@@ -1,13 +1,15 @@
 """ use "/usr/bin/python3 -m tests.test_win_heuristic" to run this file
 """
 from bokuboard.bokulogic import BokuGame
+from bokuboard.bokudata import coord_to_notation, notation_to_coord
+from bokuboard.bokudisplay import draw_board
 
 game = BokuGame()
 
 while True:
     user_player = input("player to play: ")
     user_tile = input("tile to play: ")
-    user_tile = game.notation_to_coord(user_tile)
+    user_tile = notation_to_coord(user_tile)
     if user_tile == (-99,-99,-99):
         print("tile does not exist")
         continue 
@@ -21,6 +23,6 @@ while True:
         break
 
     for key, value in values.items():
-        print(f"{game.coord_to_notation(key)} : {value}")
+        print(f"{coord_to_notation(key)} : {value}")
 
-    game.draw_board()
+    draw_board(game)

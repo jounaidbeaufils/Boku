@@ -6,8 +6,6 @@ from bokuboard.sumtrackingdict import SumTrackingDictWithUndo
 from priorityq.mapped_queue import MappedQueueWithUndo
 from minmax.heuristictile import HeuristicTile
 
-from privatedebug.utils import warn_if_called_outside_class, restrict_to_class
-
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
@@ -36,7 +34,6 @@ class BokuGame:
         for coord, value in bokudata.centricity_values.items():
             self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
 
-    @restrict_to_class
     def _win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
@@ -78,7 +75,6 @@ class BokuGame:
 
         return win, value_dict
 
-    @restrict_to_class
     def _capture_check(self, coord: tuple, capture_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
         this value is the contribution that this tile, if placed, contributes to a win on """
@@ -130,7 +126,6 @@ class BokuGame:
 
         return capture_choice, value_dict
 
-    @warn_if_called_outside_class
     def _place_tile(self, coord, tile_color, write_history=True) -> bool:
         """places a tile, and then calls win check and capture check"""
 
@@ -176,7 +171,6 @@ class BokuGame:
         #reset no_play_tile. it is only blocked for one play
         self.no_play_tile = tuple()
 
-    @warn_if_called_outside_class
     def _capture_tile(self, tile, write_history=True):
         """captes the tile it recieved in paramaters and locks that tile"""
 
@@ -196,7 +190,6 @@ class BokuGame:
             # add to the heuristic undo tracker
             self.heuristic_undo_tracker[-1][0] += 1
 
-    @warn_if_called_outside_class
     def _win_capture_check(self, coord, color, can_capture) -> tuple():
         """runs all required heuristics that should be played when a move is played
         a move includes a tile placement and a capture, 
@@ -236,13 +229,12 @@ class BokuGame:
         else:
             return False, set()
 
-    @restrict_to_class
     def _heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
         """push heuristic values to the heuristic dicts"""
 
         # set default weights
         if weights is None:
-            weights = {"capture": 1, "win": 1, "centricity": 1}
+            weights = {"capture": 0, "win": 1, "centricity": 0}
 
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()
@@ -393,7 +385,15 @@ class BokuGame:
             #in favor of white, as always. but not as bad/good as a white win
             return 90000 #90k
 
-        # return a value if not win
+        # return a value for white win
+        if self.heuristic["winner"] == "white":
+            return 100000 #100k
+
+        # return a value for white loss
+        if self.heuristic["winner"] == "black":
+            return -100000 #-100k
+
+        # return a value if not win or draw
         if self.heuristic["winner"] == "":
             white_len = len(self.heuristic["white"])
             white_score = self.heuristic["white"].total() / white_len if white_len > 0 else 0
@@ -403,11 +403,3 @@ class BokuGame:
 
             # black - white is not a misake, the heuristic is more accurate that way
             return round((black_score - white_score) * 1000)
-
-        # return a value for white win
-        if self.heuristic["winner"] == "white":
-            return 100000 #100k
-
-        # return a value for white loss
-        if self.heuristic["winner"] == "black":
-            return -100000 #-100k

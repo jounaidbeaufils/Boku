@@ -61,6 +61,9 @@ class HumanAgent(BokuAgent):
         while not valid_play:
             # input tile
             tile_notation = input(f"which tile does {self.color.upper()} place? ")
+            if tile_notation == "skip":
+                game.skip_turn()
+                return False, None
 
             # translate notation
             tile_coord = notation_to_coord(tile_notation)
@@ -89,7 +92,7 @@ class HumanAgent(BokuAgent):
                     capture = notation_to_coord(capture)
                     illegal_capture = game.play_capture(capture, capture_choice)
 
-        return win, tile_coord #TODO set up human skipping turn
+        return win, tile_coord
 
 class HeuristicAgent(BokuAgent):
     """Agent plays by using the first move in the priorityq."""

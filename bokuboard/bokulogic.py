@@ -422,8 +422,11 @@ class BokuGame:
         #TODO this function should be replaced by different functions for different agents
         # return a value if not win
         if self.heuristic["winner"] == "":
-            white_score = self.heuristic["white"].total() / len(self.heuristic["white"]) if len(self.heuristic["white"]) > 0 else 0
-            black_score = self.heuristic["black"].total() / len(self.heuristic["black"]) if len(self.heuristic["black"]) > 0 else 0
+            white_len = len(self.heuristic["white"])
+            white_score = self.heuristic["white"].total() / white_len if white_len > 0 else 0
+
+            black_len = len(self.heuristic["black"])
+            black_score = self.heuristic["black"].total() / black_len if black_len > 0 else 0
 
             # black - white is not a misake, the heuristic is more accurate that way
             return round((black_score - white_score) * 1000)

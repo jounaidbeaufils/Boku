@@ -1,6 +1,7 @@
 """"this file contains functions that are used to debug the game"""
 from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation
+from bokuboard.bokudisplay import draw_board
 
 def run_command(command: str, game: BokuGame):
     """this fuction is used to execute commands while the game loop is rnning"""
@@ -12,7 +13,7 @@ def run_command(command: str, game: BokuGame):
     else:
         command_dict = {
             "undo" : game.undo,
-            "display" : game.draw_board,
+            "display" : lambda: draw_board(game),
             # i don't want to declare a wrapper function
             # this list comprehension converts from coordinates to notation
             "history" : lambda: print([[coord_to_notation(coord) for coord in action]\

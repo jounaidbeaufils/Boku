@@ -46,8 +46,6 @@ class RandomAgent(BokuAgent):
             # play a random capture
             capture = choice(list(capture_choice))
             game.play_capture(capture, capture_choice)
-            # TODO remove prints and read from history in main
-            print(f"{self.color} RandomAgent captures {coord_to_notation(capture)}")
 
         return win, move
 

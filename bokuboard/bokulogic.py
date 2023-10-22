@@ -206,12 +206,11 @@ class BokuGame:
         color_win, color_win_dict = self._win_check(coord, color)
 
         # early exit out of heuristic when a game is won
-        if can_capture and color_win:
+        if color_win:
             self.heuristic["winner"] = color
             return color_win, set()
 
         # check for win by the opposite player
-        #TODO !improve heuristic accuracy with recursion, would ensure every value is accurate
         _, opp_win_dict = self._win_check(coord, opp_color)
 
         # check for captures after a capture, to update the heuristic
@@ -222,12 +221,8 @@ class BokuGame:
         self._heuristic_update(color_capture_dict, color_win_dict, color)
         self._heuristic_update(opp_capture_dict, opp_win_dict, opp_color)
 
-        # return the win state (false) and capture choices
-        if can_capture:
-            return False, color_choice
-
-        else:
-            return False, set()
+        # return the win state (false) and capture choices 
+        return color_win, color_choice
 
     def _heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
         """push heuristic values to the heuristic dicts"""

@@ -4,15 +4,29 @@ from random import choice
 from bokuboard import bokudata
 from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation
-from minmax.bokuagent import (BokuAgent, RandomAgent, HumanAgent, HeuristicAgent,
-                             ABNMAgentRandomCapture)
+from minmax.bokuagent import BokuAgent
+from userinputs.inputgetters import get_player_agent, get_int, get_y_or_n
+from userinputs.commands import run_command
 
-# TODO sanitize all inputs and prevent a crash from bad input
-
-def play_x_games(x=None, white=None, black=None, promt_cycle=None, random_start=None):
+def play_x_games(x=None, white: BokuAgent=None, black: BokuAgent=None,
+                 promt_cycle=None, random_start=None):
     """plays x games of boku"""
     if x is None:
-        x = int(input("how many games do you want to play? "))
+        x = get_int("how many games? ", 1, 1000000)
+
+    if promt_cycle is None:
+        promt_cycle = get_int("how many turns between prompts (1 or more)? ", 1, 1000000)
+
+    if white is None:
+        white = get_player_agent("white")
+
+    if black is None:
+        black = get_player_agent("black")
+
+    players = [white, black]
+
+    if random_start is None:
+        random_start = get_y_or_n("random start? (y/n) ")
 
     game_log = {"white win" : 0,
                 "black win" : 0,
@@ -22,22 +36,13 @@ def play_x_games(x=None, white=None, black=None, promt_cycle=None, random_start=
 
     for i in range(int(x)):
         print(f"\nStarting game {i}")
-        start_game(i, white=white, black=black, promt_cycle=promt_cycle,
+        start_game(i, players=players, promt_cycle=promt_cycle,
                    game_log=game_log, random_start=random_start)
 
     print(f"{game_log}")
 
-def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, random_start=None):
+def start_game(game_n, players, promt_cycle, game_log, random_start, **kwargs):
     """This methods starts a game of boku"""
-
-    # set promt cycle
-    if promt_cycle is None:
-        # TODO command on human turn, new module?
-        promt_cycle = int(input("how many turns between prompts (1 or more)? "))
-
-    # set players
-    players = [get_player_agent("white") if white is None else agent_dict[white]("white"),
-               get_player_agent("black") if black is None else agent_dict[black]("black")]
 
     # initialize game
     game_on = True
@@ -98,66 +103,5 @@ def start_game(game_n, white=None, black=None, promt_cycle=None, game_log=None, 
         if ((turn + 1) % promt_cycle == 0 and player.color == "black") or not game_on:
             run_command("start", game)
 
-def run_command(command: str, game: BokuGame):
-    """this fuction is used to execute commands while the game loop is rnning"""
-    if command == "start":
-        while command != "":
-            command = input("press enter to continue or type a command: ")
-            if command != "":
-                run_command(command, game)
-    else:
-        command_dict = {
-            "undo" : game.undo,
-            "display" : game.draw_board,
-            # i don't want to declare a wrapper function
-            # this list comprehension converts from coordinates to notation
-            "history" : lambda: print([[coord_to_notation(coord) for coord in action]\
-                                        for action in game.history]),
-            "occupied": lambda: print(game.occupied_dict),
-            "heuristic": lambda: print(game.heuristic[input("enter color: ")]),
-            "undo tracker": lambda: print(game.heuristic_undo_tracker),
-            "no play": lambda: print(coord_to_notation(game.no_play_tile)),
-        }
-        if command not in command_dict:
-            print(f"command '{command}' is not a valid command")
-
-        else:
-            # run command
-            data = command_dict[command]()
-
-            # print command data
-            print_list = []
-            if command in print_list:
-                print(data)
-
-agent_dict = {
-        "human" : HumanAgent,
-        "random" : RandomAgent,
-        "heuristic" : HeuristicAgent,
-        "abnm" : ABNMAgentRandomCapture,
-    }
-
-def get_player_agent(color) -> BokuAgent:
-    """This function asks the user if the player is an AI and returns the corresponding agent"""
-    agent_list = list(agent_dict.keys())
-
-    agent = None
-    agent_choice = ""
-
-    while agent_choice not in  agent_dict:
-        agent_choice = input(f"""Available agents are: {str(agent_list)}.
-                                 what agent is {color.upper()}? """)
-        agent = agent_dict[agent_choice](color)
-
-    return agent
-
-
-
 if __name__ == "__main__":
-    white_agent = input("white agent: ")
-    black_agent = input("black agent: ")
-    random_start_input = input("random start? (y/n) ").lower() == "y"
-    promt_cycle_input = int(input("how many turns between prompts (1 or more)? "))
-    games_number = int(input("how many games? "))
-
-    play_x_games(games_number, white_agent, black_agent, promt_cycle_input, random_start_input)
+    play_x_games()

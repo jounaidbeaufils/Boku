@@ -139,15 +139,12 @@ class ABNMAgentRandomCapture(BokuAgent):
     """Agent plays using a alpha-beta negamax search, will ask for ply depth at each turn.
        the agent will capture randomly when required to capture"""
 
-    def __init__(self, color: str, depth:int=None):
+    def __init__(self, color: str, depth:int):
         super().__init__(color)
         self.depth = depth
 
     def play(self, game: BokuGame):
         """play a move"""
-        # check that a depth is given
-        if self.depth is None:
-            self.depth = int(input(f"what depth should the {self.color} agent search? "))
 
         # run search
         move, _ = ab_negmax_random_capture(node=game, depth=self.depth)

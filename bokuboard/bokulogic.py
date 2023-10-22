@@ -14,6 +14,7 @@ from privatedebug.utils import warn_if_called_outside_class, restrict_to_class
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
+    # TODO add move logging to txt and program reboot
     def __init__(self):
         self.occupied_dict = {coord : "free" for coord in bokudata.all_coords}
         self.no_play_tile = tuple()

@@ -7,6 +7,8 @@ from bokuboard.bokudata import coord_to_notation
 from minmax.bokuagent import (BokuAgent, RandomAgent, HumanAgent, HeuristicAgent,
                              ABNMAgentRandomCapture)
 
+# TODO sanitize all inputs and prevent a crash from bad input
+
 def play_x_games(x=None, white=None, black=None, promt_cycle=None, random_start=None):
     """plays x games of boku"""
     if x is None:

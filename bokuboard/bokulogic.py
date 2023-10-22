@@ -229,7 +229,7 @@ class BokuGame:
 
         # set default weights
         if weights is None:
-            weights = {"capture": 0, "win": 1, "centricity": 0}
+            weights = {"capture": 1, "win": 1, "centricity": 1}
 
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()

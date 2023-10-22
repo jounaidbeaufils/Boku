@@ -104,7 +104,8 @@ class HeuristicAgent(BokuAgent):
             move_coord = move.tile
             if move_coord == game.no_play_tile:
                 # if another move is available
-                if len(game.heuristic["move order"]) > 0: #TODO this will mess with the undo, fix it
+                #!TODO this will mess with the undo. but the agent is not used
+                if len(game.heuristic["move order"]) > 0:
                     new_move = game.heuristic["move order"].pop()
                     game.heuristic["move order"].push(move)
                     move_coord = new_move.tile
@@ -118,17 +119,12 @@ class HeuristicAgent(BokuAgent):
                 continue
 
             if capture_choice:
-                notation_list = [coord_to_notation(coord) for coord in capture_choice]
-                print(f"{self.color} can capture from:{notation_list}")
-
                 # capture at random because occupied tiles don't have a heuristic
                 capture = choice(list(capture_choice))
                 game.play_capture(capture, capture_choice)
-                print(f"{self.color} HeuristicAgent captures {coord_to_notation(capture)}")
 
         # TODO implement turn skipping, properly
         if illegal:
-            print(f"{self.color} HeuristicAgent has no legal moves left")
             game.skip_turn()
             return False, None
         return win, move_coord

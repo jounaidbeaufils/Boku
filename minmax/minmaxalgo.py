@@ -4,6 +4,9 @@ from random import choice
 
 from bokuboard.bokulogic import BokuGame
 
+# TODO account for captures
+# TODO Iterative deepening
+
 def ab_negmax_random_capture(node: BokuGame,
                              depth: int,
                              alpha: int=float('-inf'),

@@ -4,7 +4,7 @@ from random import randint, choice
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation, notation_to_coord
-from minmax.minmaxalgo import ab_negmax_random_capture
+from minmax.minmaxalgo import ab_negmax_random_capture, ab_negmax_with_capture
 
 @abstractmethod
 class BokuAgent(ABC):
@@ -158,5 +158,36 @@ class ABNMAgentRandomCapture(BokuAgent):
         if capture_choice:
             # play a random capture
             capture = choice(list(capture_choice))
+            game.play_capture(capture, capture_choice)
+        return win, move
+
+class ABNMAgentWithCapture(BokuAgent):
+    """Agent plays using a alpha-beta negamax search, will ask for ply depth at each turn.
+       the agent will capture randomly when required to capture"""
+
+    def __init__(self, color: str, depth:int):
+        super().__init__(color)
+        self.depth = depth
+
+    def play(self, game: BokuGame):
+        """play a move"""
+
+        # run search
+        move, capture, _ = ab_negmax_with_capture(node=game, depth=self.depth)
+
+        if move is None:
+            game.skip_turn()
+            return False, "skip"
+
+        # play the move
+        _, win, capture_choice = game.play_tile(move, self.color)
+        if capture_choice:
+            print("was a capture plaed when required to capture?")
+        if win:
+            return win, move
+
+        # check if there is a capture
+        if capture is not None:
+            # play capture
             game.play_capture(capture, capture_choice)
         return win, move

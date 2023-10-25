@@ -23,7 +23,7 @@ def get_player_agent(color) :
             print(f"{agent_choice} is not a valid agent")
 
     # get additional parameters, then initialize the agent
-    if agent_choice == "ABNMAgentRandomCapture":
+    if agent_choice in {"ABNMAgentRandomCapture", "ABNMAgentWithCapture"}:
         depth = get_int(f"to what depth should {color} search? ", 1, 10)
         agent = agent_dict[agent_choice](color, depth)
     else:

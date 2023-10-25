@@ -144,6 +144,10 @@ class ABNMAgentRandomCapture(BokuAgent):
         # run search
         move, _ = ab_negmax_random_capture(node=game, depth=self.depth)
 
+        if move is None:
+            game.skip_turn()
+            return False, "skip"
+
         # play the move
         _, win, capture_choice = game.play_tile(move, self.color)
 
@@ -155,6 +159,4 @@ class ABNMAgentRandomCapture(BokuAgent):
             # play a random capture
             capture = choice(list(capture_choice))
             game.play_capture(capture, capture_choice)
-            print(f"{self.color} ABNMAgentRandomCapture captures {coord_to_notation(capture)}")
-
         return win, move

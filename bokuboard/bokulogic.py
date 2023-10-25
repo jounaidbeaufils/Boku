@@ -279,9 +279,9 @@ class BokuGame:
             intended as a one move call for agents
             making play_capture the only other call
         """
-        illegal = True
-        win = False
-        capture_choice = set()
+        illegal: bool = True
+        win: bool = False
+        capture_choice: set = set()
 
         # attempt to play the tile
         illegal = self._place_tile(coord, color)

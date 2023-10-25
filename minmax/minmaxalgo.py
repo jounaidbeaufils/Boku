@@ -34,8 +34,16 @@ def ab_negmax_random_capture(node: BokuGame,
             continue
 
         # play the move (generate the successor state)
-        #TODO a win can be detected here, should it?
-        _, _, capture_choice = node.play_tile(move.tile, color)
+        _, win, capture_choice = node.play_tile(move.tile, color)
+
+        # check for a win, skip into Base Case
+        if win:
+            # undo the move, so we only ever use one BokuGame object
+            node.undo()
+
+            # the board reports the value according to white's perspective
+            value = node.eval() if len(node.history) % 2 == 0 else -node.eval()
+            return move.tile, value
 
         # check if there is a capture
         if capture_choice:

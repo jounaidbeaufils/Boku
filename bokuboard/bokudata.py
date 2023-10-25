@@ -105,7 +105,10 @@ def coord_to_notation(coord):
     """will return an empty string if the coord is not on the boord"""
 
     notation = ""
-    if coord in all_coords:
+    if coord == "skip":
+        notation = "skip"
+
+    elif coord in all_coords:
         notation = ""
         alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 

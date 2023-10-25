@@ -126,7 +126,8 @@ class HeuristicAgent(BokuAgent):
         # TODO implement turn skipping, properly
         if illegal:
             game.skip_turn()
-            return False, None
+            return False, "skip"
+        print(f"{self.color} HeuristicAgent plays {coord_to_notation(move_coord)}")
         return win, move_coord
 
 class ABNMAgentRandomCapture(BokuAgent):

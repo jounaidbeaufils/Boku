@@ -19,9 +19,12 @@ def run_command(command: str, game: BokuGame):
             "history" : lambda: print([[coord_to_notation(coord) for coord in action]\
                                         for action in game.history]),
             "occupied": lambda: print(game.occupied_dict),
-            "heuristic": lambda: print(game.heuristic[input("enter color: ")]),
+            "heuristic": lambda: print({coord_to_notation(coord): round(value, 3)
+                                        for coord, value in game.heuristic[input("enter color: ")].items()}),
             "undo tracker": lambda: print(game.heuristic_undo_tracker),
             "no play": lambda: print(coord_to_notation(game.no_play_tile)),
+            "best move": lambda: print([coord_to_notation(elm.tile) + f": {str(round(elm.value, 3))}"
+                                        for elm in game.heuristic["move order"]]),
         }
         if command not in command_dict:
             print(f"command '{command}' is not a valid command")

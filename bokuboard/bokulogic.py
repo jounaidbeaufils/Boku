@@ -31,7 +31,7 @@ class BokuGame:
             "black" : SumTrackingDictWithUndo(),
             "winner": ""}
 
-        for coord, value in bokudata.centricity_values.items():
+        for coord, value in bokudata.centricity_values_normalized.items():
             self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
 
     def _win_check(self, coord: tuple, win_color: str):
@@ -229,7 +229,7 @@ class BokuGame:
 
         # set default weights
         if weights is None:
-            weights = {"capture": 1, "win": 1, "centricity": 1}
+            weights = {"capture": 0.5, "win": 1, "centricity": 0.001}
 
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()
@@ -375,7 +375,7 @@ class BokuGame:
         """evaluate the game state and return a value"""
         #TODO !this function should be replaced by different functions for different agents
         # check for a draw
-        if self.history[-1][0] == "" and self.history[-2][0] == "":
+        if self.history[-1][0] == "skip" and self.history[-2][0] == "skip":
             self.heuristic["winner"] = "draw"
             #in favor of white, as always. but not as bad/good as a white win
             return 90000 #90k

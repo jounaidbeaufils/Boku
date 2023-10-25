@@ -398,3 +398,9 @@ class BokuGame:
 
             # black - white is not a misake, the heuristic is more accurate that way
             return round((black_score - white_score) * 1000)
+
+def __hash__(self):
+    return hash(tuple(self.occupied_dict.items(), self.no_play_tile))
+
+def __eq__(self, other):
+    return self.occupied_dict == other.occupied_dict and self.no_play_tile == other.no_play_tile

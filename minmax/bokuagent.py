@@ -4,7 +4,8 @@ from random import randint, choice
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation, notation_to_coord
-from minmax.minmaxalgo import ab_negmax_random_capture, ab_negmax_with_capture
+from minmax.minmaxalgo import ab_negmax_capture_tt, ab_negmax_random_capture, ab_negmax_with_capture
+from minmax.transitiontable import LRUCacheWithDefault
 
 @abstractmethod
 class BokuAgent(ABC):
@@ -130,8 +131,11 @@ class HeuristicAgent(BokuAgent):
         print(f"{self.color} HeuristicAgent plays {coord_to_notation(move_coord)}")
         return win, move_coord
 
-class ABNMAgentRandomCapture(BokuAgent):
-    """Agent plays using a alpha-beta negamax search, will ask for ply depth at each turn.
+class ABNMBokuAgent(BokuAgent):
+    """Agent plays using a alpha-beta negamax search."""
+
+class ABNMAgentRandomCapture(ABNMBokuAgent):
+    """Agent plays using a alpha-beta negamax search,
        the agent will capture randomly when required to capture"""
 
     def __init__(self, color: str, depth:int):
@@ -161,8 +165,8 @@ class ABNMAgentRandomCapture(BokuAgent):
             game.play_capture(capture, capture_choice)
         return win, move
 
-class ABNMAgentWithCapture(BokuAgent):
-    """Agent plays using a alpha-beta negamax search, will ask for ply depth at each turn.
+class ABNMAgentWithCapture(ABNMBokuAgent):
+    """Agent plays using a alpha-beta negamax search,
        the agent will capture randomly when required to capture"""
 
     def __init__(self, color: str, depth:int):
@@ -178,6 +182,40 @@ class ABNMAgentWithCapture(BokuAgent):
         if move is None:
             game.skip_turn()
             return False, "skip"
+
+        # play the move
+        _, win, capture_choice = game.play_tile(move, self.color)
+        if capture_choice:
+            print("was a capture plaed when required to capture?")
+        if win:
+            return win, move
+
+        # check if there is a capture
+        if capture is not None:
+            # play capture
+            game.play_capture(capture, capture_choice)
+        return win, move
+
+class ABNMAgentWithTT(ABNMBokuAgent):
+    """Agent plays using a alpha-beta negamax search with a transposition table."""
+    def __init__(self, color: str, depth:int):
+        super().__init__(color)
+        self.depth = depth
+        self.tt = LRUCacheWithDefault(100000, lambda: {'depth': -1})
+
+    def play(self, game: BokuGame):
+        """play a move"""
+
+        # run search
+        move, capture, _ = ab_negmax_capture_tt(node=game, depth=self.depth)
+
+
+        if move is None:
+            game.skip_turn()
+            return False, "skip"
+        
+        # clean this move from the transposition table, it is illegal after this turn
+        del self.tt[game]
 
         # play the move
         _, win, capture_choice = game.play_tile(move, self.color)

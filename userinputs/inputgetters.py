@@ -1,7 +1,7 @@
 """This module contains functions that ask the user for input and return the corresponding value"""
 import inspect
 
-from minmax.bokuagent import BokuAgent
+from minmax.bokuagent import ABNMBokuAgent, BokuAgent
 
 def get_player_agent(color) :
     """This function asks the user if the player is an AI and returns the corresponding agent"""
@@ -11,6 +11,9 @@ def get_player_agent(color) :
 
     agent_dict = {}
     for subclass in BokuAgent.__subclasses__():
+        agent_dict[subclass.__name__] = subclass
+
+    for subclass in ABNMBokuAgent.__subclasses__():
         agent_dict[subclass.__name__] = subclass
 
     agent_list = list(agent_dict.keys())
@@ -23,7 +26,7 @@ def get_player_agent(color) :
             print(f"{agent_choice} is not a valid agent")
 
     # get additional parameters, then initialize the agent
-    if agent_choice in {"ABNMAgentRandomCapture", "ABNMAgentWithCapture"}:
+    if issubclass(agent_dict[agent_choice], ABNMBokuAgent):
         depth = get_int(f"to what depth should {color} search? ", 1, 10)
         agent = agent_dict[agent_choice](color, depth)
     else:

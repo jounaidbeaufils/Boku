@@ -3,6 +3,8 @@
 from random import choice
 
 from bokuboard.bokulogic import BokuGame
+from minmax.transitiontable import LRUCacheWithDefault
+from bokuboard.bokudata import coord_to_notation
 
 # TODO Iterative deepening
 
@@ -169,3 +171,98 @@ def ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, capt
         break_bool = True
 
     return break_bool, alpha, beta, score, best_move, move_capture
+
+def ab_negmax_capture_tt(node: BokuGame,
+                             depth: int,
+                             alpha: int=float('-inf'),
+                             beta: int=float('inf'),
+                             tt: LRUCacheWithDefault= 
+                             LRUCacheWithDefault(100000, lambda: {'depth': -1})):
+    """Alpha Beta Negamax with transposition table"""
+
+    ## Transposition Table Lookup
+    old_alpha = alpha
+
+    # get the node from the TT
+    tt[node] = tt[node]
+    if tt[node]["depth"] >= depth:
+        # TODO remove the legality check, by removing the move from the TT
+        if tt[node]["flag"] == "Exact" and node.occupied_dict[tt[node]["move"]] == "free" and node.no_play_tile != tt[node]["move"]:
+            print("TT hit move")
+            return tt[node]["move"], tt[node]["capture"], tt[node]["value"]
+        
+        elif tt[node]["flag"] == "LowerBound":
+            alpha = max(alpha, tt[node].value)
+        elif tt[node]["flag"] == "UpperBound":
+            beta = min(beta, tt[node].value)
+        if alpha>=beta:
+            print("TT hit move")
+            return tt[node]["move"], tt[node]["capture"], tt[node]["value"]
+
+    ## Classic Negamax #TODO refactor negamax to return alpha and beta, the call it here
+    # initialize the best move, score and the color of the player to play
+    score = float('-inf')
+    best_move = None
+    color = "white" if len(node.history) % 2 == 0 else "black"
+
+    # go through all the children (moves) by iterating the move order priorityq
+    for move in node.heuristic["move order"]:
+        move_capture = None
+        # skip the no play tile, this is the only illegal move in the priorityq
+        # because the priorityq is shared between the two players
+        if move.tile == node.no_play_tile:
+            continue
+
+        # play the move (generate the successor state)
+        _, _, capture_choice = node.play_tile(move.tile, color)
+
+        # check if there is a capture
+        if capture_choice:
+            # iterate through the captures
+            break_bool = False
+            for capture in capture_choice:
+                node.play_capture(capture, capture_choice)
+
+                # call negamax encapsulated logic for each capture
+                break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, capture)
+
+                if break_bool:
+                    break
+
+            # undo the move
+            node.undo()
+
+            if break_bool:
+                break
+
+        else:
+            # call negamax encapsulated logic
+            break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, None)
+
+            if break_bool:
+                break
+
+    ## Transposition Table Update
+    flag = ""
+    #Fail-low result implies an upper bound
+    if score <= old_alpha:
+        flag = "UpperBound"
+
+    # Fail-high result implies a lower bound
+    elif score >= beta:
+        flag = "LowerBound"
+    # this part stores information in the TT
+    else:
+        flag = "Exact"
+
+    # actually update the TT
+    tt[node]["flag"] = flag
+    tt[node]["value"] = score
+    tt[node]["move"] = best_move
+    tt[node]["capture"] = move_capture
+    tt[node]["depth"] = depth
+
+    if tt[node]["depth"] == -1:
+        print("TT update failed")
+
+    return best_move, move_capture, score

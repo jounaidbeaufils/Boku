@@ -213,9 +213,6 @@ class ABNMAgentWithTT(ABNMBokuAgent):
         if move is None:
             game.skip_turn()
             return False, "skip"
-        
-        # clean this move from the transposition table, it is illegal after this turn
-        del self.tt[game]
 
         # play the move
         _, win, capture_choice = game.play_tile(move, self.color)

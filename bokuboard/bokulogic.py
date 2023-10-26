@@ -243,7 +243,7 @@ class BokuGame:
                 combined_value_dict[key] *= weights["capture"]
 
             # add the weighted win value to the capture value
-            combined_value_dict[key] += value * weights["win"]
+            combined_value_dict[key] += (value**2 * weights["win"])
 
             # add the centricity value to the capture value
             combined_value_dict[key] += self.heuristic["centricity"][key] * weights["centricity"]

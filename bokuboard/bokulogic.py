@@ -391,10 +391,10 @@ class BokuGame:
         # return a value if not win or draw
         if self.heuristic["winner"] == "":
             white_len = len(self.heuristic["white"])
-            white_score = self.heuristic["white"].total() / white_len if white_len > 0 else 0
-
+            white_score = self.heuristic["white"].total()
+            
             black_len = len(self.heuristic["black"])
-            black_score = self.heuristic["black"].total() / black_len if black_len > 0 else 0
+            black_score = self.heuristic["black"].total()
 
             # black - white is not a misake, the heuristic is more accurate that way
             return round((black_score - white_score) * 1000)

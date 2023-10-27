@@ -71,7 +71,7 @@ class BokuGame:
 
                 if sum(sub_line_addition) > 0:
                     for t_n, value in enumerate(sub_line_addition):
-                        value_dict[line_coords[s_l + t_n]] += value / counter
+                        value_dict[line_coords[s_l + t_n]] = max(value * counter, value_dict[line_coords[s_l + t_n]])
 
         return win, value_dict
 
@@ -243,7 +243,7 @@ class BokuGame:
                 combined_value_dict[key] *= weights["capture"]
 
             # add the weighted win value to the capture value
-            combined_value_dict[key] += (value**2 * weights["win"])
+            combined_value_dict[key] += value * weights["win"]
 
             # add the centricity value to the capture value
             combined_value_dict[key] += self.heuristic["centricity"][key] * weights["centricity"]
@@ -287,8 +287,13 @@ class BokuGame:
         illegal = self._place_tile(coord, color)
 
         if not illegal:
-            # check for win and capture, if the tile was placed
-            win, capture_choice = self._win_capture_check(coord, color, True)
+            # check for win
+            win, win_dict = self._win_check(coord, color)
+
+            # check for capture
+            capture_choice, capture_dict = self._capture_check(coord, color)
+
+            self._heuristic_update(capture_dict, win_dict, color)
 
         return illegal, win, capture_choice
 
@@ -392,7 +397,7 @@ class BokuGame:
         if self.heuristic["winner"] == "":
             white_len = len(self.heuristic["white"])
             white_score = self.heuristic["white"].total()
-            
+
             black_len = len(self.heuristic["black"])
             black_score = self.heuristic["black"].total()
 

@@ -299,10 +299,16 @@ def ab_negmax_with_capture_2(node: BokuGame,
         # because the priorityq is shared between the two players
         if move.tile == node.no_play_tile:
             continue
-
         # play the move (generate the successor state)
         _, _, capture_choice = node.play_tile(move.tile, color)
 
+        """
+        if len(node.history) < 5:
+            print([[coord_to_notation(coord) for coord in action] for action in node.history])
+
+        else:
+            print([[coord_to_notation(coord) for coord in action] for action in node.history[-5:]])
+        """
         # check if there is a capture
         ## checking all "submoves" of this capturing move
         if capture_choice:
@@ -315,6 +321,7 @@ def ab_negmax_with_capture_2(node: BokuGame,
             # break flag is used to break out of both loops
             break_flag = False
             for capture in capture_choice:
+                print(f"capture loop affected: {[coord_to_notation(move.tile), coord_to_notation(capture)]}")
                 # play the move (generate the successor state)
                 _, _, _ = node.play_tile(move.tile, color)
 
@@ -341,6 +348,7 @@ def ab_negmax_with_capture_2(node: BokuGame,
                     break_flag = True
 
                     # break out of the capture loop
+                    #print("prune\n")
                     break
             
             # break after the capture loop
@@ -365,6 +373,7 @@ def ab_negmax_with_capture_2(node: BokuGame,
                 alpha = score
 
             if score >= beta:
+                #print("prune\n")
                 break
 
     return best_move, best_capture, score

@@ -187,9 +187,11 @@ class BokuGame:
 
         # write move to history
         if write_history:
-
             # add the removed tile on the latest turn's entry
             self.history[-1].append(tile)
+
+            # add the tile to the no_play_tile
+            self.no_play_tile = tile
 
             # return the tile to the move order heuristic
             heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * BokuGame.CENTRICITY * -1)

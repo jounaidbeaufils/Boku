@@ -266,3 +266,105 @@ def ab_negmax_capture_tt(node: BokuGame,
         print("TT update failed")
 
     return best_move, move_capture, score
+
+def ab_negmax_with_capture_2(node: BokuGame,
+                             depth: int,
+                             alpha: int=float('-inf'),
+                             beta: int=float('inf')):
+    """negamax algorithm with alpha beta pruning"""
+
+    ### Base Case: check if we are at a leaf node
+    # recusion depth is is reached or the game is over (win, lose, draw)
+    if depth == 0 or node.heuristic["winner"] != "":
+        # the board reports the value according to white's perspective
+        value = node.eval() if len(node.history) % 2 == 0 else -node.eval()
+
+        # get the move
+        move = node.history[-1][0]
+
+        # get the capture 
+        capture = node.history[-1][1] if len(node.history[-1]) > 1 else None
+        return move, capture, value
+
+    ### Recursion Case:
+    # initialize the best move, score and the color of the player to play
+    score = float('-inf')
+    best_move = None
+    best_capture = None
+    color = "white" if len(node.history) % 2 == 0 else "black"
+
+    # go through all the children (moves) by iterating the move order priorityq
+    for move in node.heuristic["move order"]:
+        # skip the no play tile, this is the only illegal move in the priorityq
+        # because the priorityq is shared between the two players
+        if move.tile == node.no_play_tile:
+            continue
+
+        # play the move (generate the successor state)
+        _, _, capture_choice = node.play_tile(move.tile, color)
+
+        # check if there is a capture
+        ## checking all "submoves" of this capturing move
+        if capture_choice:
+            # undo the move that lead to the capture
+            # because undo undoes the whole move,
+            # we need to play the move and capture each time
+            node.undo()
+
+            # iterate through the captures and play each one
+            # break flag is used to break out of both loops
+            break_flag = False
+            for capture in capture_choice:
+                # play the move (generate the successor state)
+                _, _, _ = node.play_tile(move.tile, color)
+
+                # play the capture
+                node.play_capture(capture, capture_choice)
+
+                # call negamax on the successor state, flip the signs
+                _, _, value = ab_negmax_with_capture_2(node, depth - 1, -beta, -alpha)
+                value *= -1
+
+                # undo the move, so we only ever use one BokuGame object
+                node.undo()
+
+                if value > score:
+                    score = value
+                    best_move = move.tile
+                    best_capture = capture
+
+                if score > alpha:
+                    alpha = score
+
+                if score >= beta:
+                    # set the break flag, so we break out of both loops
+                    break_flag = True
+
+                    # break out of the capture loop
+                    break
+            
+            # break after the capture loop
+            # this breaks out of alpha beta alltogether
+            if break_flag:
+                break
+        
+        ## checking the move "normally"
+        else:
+            # call negamax on the successor state, flip the signs
+            _, _, value = ab_negmax_with_capture_2(node, depth - 1, -beta, -alpha)
+            value *= -1
+
+            # undo the move, so we only ever use one BokuGame object
+            node.undo()
+
+            if value > score:
+                score = value
+                best_move = move.tile
+
+            if score > alpha:
+                alpha = score
+
+            if score >= beta:
+                break
+
+    return best_move, best_capture, score

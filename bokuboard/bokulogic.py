@@ -194,8 +194,8 @@ class BokuGame:
             self.no_play_tile = tile
 
             # return the tile to the move order heuristic
-            heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * BokuGame.CENTRICITY * -1)
-            self.heuristic["move order"].push(heuristic_tile)
+            self.heuristic["move order"].push(HeuristicTile(
+                tile, bokudata.centricity_values_normalized[tile] * BokuGame.CENTRICITY * -1))
 
             # add to the heuristic undo tracker
             self.heuristic_undo_tracker[-1][0] += 1
@@ -270,7 +270,7 @@ class BokuGame:
                 # update the move ordering peiority queue
                 self.heuristic["move order"].update(HeuristicTile(key, 0),
                                                     HeuristicTile(key, value))
-                
+
                 # count the number of changes to the move order heuristic
                 move_order_changes += 1
 
@@ -415,12 +415,12 @@ class BokuGame:
             # black - white is not a misake, the heuristic is more accurate that way
             # because the signs are flipped in the heuristic for move ordering with priorityq
             return round((black_score - white_score) * 1000)
-        
+
     def unique_values_count(self, data_dict):
         """counts the number of unique values in a dictionary"""
         # Create an empty dictionary to store the counts
         count_dict = {}
-        
+
         # Loop through the dictionary values
         for value in data_dict.values():
             value = round(value)
@@ -428,14 +428,15 @@ class BokuGame:
                 count_dict[value] += 1
             else:
                 count_dict[value] = 1
-                
+
         return count_dict
 
 
 def __hash__(self):
     hash_val = hash(tuple(tuple(coord, value) for coord, value in self.occupied_dict.items()))
     print(hash_val)
-    return hash(tuple(tuple(coord, value) for coord, value in self.occupied_dict.items()), self.no_play_tile)
+    return hash(tuple(tuple(coord, value)
+                      for coord, value in self.occupied_dict.items()), self.no_play_tile)
 
 def __eq__(self, other):
     return self.occupied_dict == other.occupied_dict and self.no_play_tile == other.no_play_tile

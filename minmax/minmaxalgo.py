@@ -3,8 +3,8 @@
 from random import choice
 
 from bokuboard.bokulogic import BokuGame
-from minmax.transitiontable import LRUCache, LRUCacheWithDefault
 from bokuboard.bokudata import coord_to_notation
+from minmax.transitiontable import LRUCache, LRUCacheWithDefault
 
 # TODO Iterative deepening
 
@@ -120,7 +120,8 @@ def ab_negmax_with_capture(node: BokuGame,
                 node.play_capture(capture, capture_choice)
 
                 # call negamax encapsulated logic for each capture
-                break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, capture)
+                break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(
+                    node, depth, alpha, beta, score, best_move, move, capture)
 
                 if break_bool:
                     break
@@ -133,14 +134,16 @@ def ab_negmax_with_capture(node: BokuGame,
 
         else:
             # call negamax encapsulated logic
-            break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, None)
+            break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(
+                node, depth, alpha, beta, score, best_move, move, None)
 
             if break_bool:
                 break
 
     return best_move, move_capture, score
 
-def ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, capture):
+def ab_negmax_score_logic(node, depth, alpha, beta,
+                          score, best_move, move, capture):
     """negamax algorithm value update logic"""
     break_bool = False
     move_capture = None
@@ -187,10 +190,12 @@ def ab_negmax_capture_tt(node: BokuGame,
     tt[node] = tt[node]
     if tt[node]["depth"] >= depth:
         # TODO remove the legality check, by removing the move from the TT
-        if tt[node]["flag"] == "Exact" and node.occupied_dict[tt[node]["move"]] == "free" and node.no_play_tile != tt[node]["move"]:
+        if tt[node]["flag"] == "Exact" and\
+            node.occupied_dict[tt[node]["move"]] == "free" and\
+                node.no_play_tile != tt[node]["move"]:
             print("TT hit move")
             return tt[node]["move"], tt[node]["capture"], tt[node]["value"]
-        
+
         elif tt[node]["flag"] == "LowerBound":
             alpha = max(alpha, tt[node].value)
         elif tt[node]["flag"] == "UpperBound":
@@ -224,7 +229,8 @@ def ab_negmax_capture_tt(node: BokuGame,
                 node.play_capture(capture, capture_choice)
 
                 # call negamax encapsulated logic for each capture
-                break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, capture)
+                break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(
+                    node, depth, alpha, beta, score, best_move, move, capture)
 
                 if break_bool:
                     break
@@ -237,7 +243,8 @@ def ab_negmax_capture_tt(node: BokuGame,
 
         else:
             # call negamax encapsulated logic
-            break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(node, depth, alpha, beta, score, best_move, move, None)
+            break_bool, alpha, beta, score, best_move, move_capture = ab_negmax_score_logic(
+                node, depth, alpha, beta, score, best_move, move, None)
 
             if break_bool:
                 break
@@ -283,7 +290,7 @@ def ab_negmax_with_capture_2(node: BokuGame,
         # get the move
         move = node.history[-1][0]
 
-        # get the capture 
+        # get the capture
         capture = node.history[-1][1] if len(node.history[-1]) > 1 else None
         return move, capture, value
 
@@ -343,12 +350,12 @@ def ab_negmax_with_capture_2(node: BokuGame,
                     # break out of the capture loop
                     #print("prune\n")
                     break
-            
+
             # break after the capture loop
             # this breaks out of alpha beta alltogether
             if break_flag:
                 break
-        
+
         ## checking the move "normally"
         else:
             # call negamax on the successor state, flip the signs
@@ -385,7 +392,7 @@ def ab_negmax_capture_tt_2(node: BokuGame,
     tt_val = tt.get(hash_val)
     if tt_val["depth"] > -1:
         print("tt fund a position but with the from depth")
-        
+
     # get the node from the TT
     if tt_val["depth"] >= depth:
         # TODO remove the legality check, by removing the move from the TT

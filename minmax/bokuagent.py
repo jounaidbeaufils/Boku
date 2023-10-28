@@ -4,7 +4,8 @@ from random import randint, choice
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation, notation_to_coord
-from minmax.minmaxalgo import ab_negmax_capture_tt, ab_negmax_capture_tt_2, ab_negmax_random_capture, ab_negmax_with_capture, ab_negmax_with_capture_2
+from minmax.minmaxalgo import (ab_negmax_capture_tt_2, ab_negmax_random_capture,
+                               ab_negmax_with_capture_2)
 from minmax.transitiontable import LRUCacheWithDefault
 from userinputs.commands import run_command
 

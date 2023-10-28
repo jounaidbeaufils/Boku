@@ -28,7 +28,9 @@ class LRUCacheWithDefault:
             self.cache.pop(key)
 
 class LRUCache:
-    """Class for a Least Recently Used Cache."""
+    """Class for a Least Recently Used Cache. Taken from the the following URL:
+    https://www.geeksforgeeks.org/lru-cache-in-python-using-ordereddict/
+    """
     # initialising capacity
     def __init__(self, capacity: int, default_func: callable):
         self.cache = OrderedDict()

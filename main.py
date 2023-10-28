@@ -6,11 +6,16 @@ from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation
 from minmax.bokuagent import BokuAgent
 from userinputs.inputgetters import get_player_agent, get_int, get_y_or_n
+from userinputs.commands import run_command
 
-def play_x_games(x=None, white: BokuAgent=None, black: BokuAgent=None, random_start=None):
+def play_x_games(x=None, white: BokuAgent=None, black: BokuAgent=None,
+                 promt_cycle=None, random_start=None):
     """plays x games of boku"""
     if x is None:
         x = get_int("how many games? ", 1, 1000000)
+
+    if promt_cycle is None:
+        promt_cycle = get_int("how many turns between prompts (1 or more)? ", 1, 1000000)
 
     if white is None:
         white = get_player_agent("white")
@@ -31,11 +36,12 @@ def play_x_games(x=None, white: BokuAgent=None, black: BokuAgent=None, random_st
 
     for i in range(int(x)):
         print(f"\nStarting game {i}")
-        start_game(i, players=players, game_log=game_log, random_start=random_start)
+        start_game(i, players=players, promt_cycle=promt_cycle,
+                   game_log=game_log, random_start=random_start)
 
     print(f"{game_log}")
 
-def start_game(game_n, players, game_log, random_start):
+def start_game(game_n, players, promt_cycle, game_log, random_start):
     """This methods starts a game of boku"""
 
     # initialize game
@@ -93,6 +99,10 @@ def start_game(game_n, players, game_log, random_start):
 
         # update last game balance
         last_game_balance = game_balance
+
+        # run command opportunity at interval
+        if ((turn + 1) % promt_cycle == 0 and player.color == "black") or not game_on:
+            run_command("start", game)
 
 if __name__ == "__main__":
     play_x_games()

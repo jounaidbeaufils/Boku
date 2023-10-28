@@ -27,10 +27,15 @@ def draw_board(game: BokuGame):
                                     orientation=np.radians(30), facecolor=color,
                                     alpha=0.3, edgecolor='k')
         ax.add_patch(hexagon)
-        ax.text(x, y, bokudata.coord_to_notation(coord), ha='center', va='center', fontsize=10)
+        ax.text(x, y, bokudata.centricity_values[coord], ha='center', va='center', fontsize=10)
 
     # add scatter points in hexagon centers, to ensure all hexagons are in the plot zoom range
     # TODO !fix this ploting hack
     ax.scatter(hcoord, vcoord, alpha=0.0)
 
     plt.show(block=False)
+
+if __name__ == "__main__":
+    game = BokuGame()
+    draw_board(game)
+    input("press enter to continue")

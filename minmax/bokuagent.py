@@ -191,8 +191,8 @@ class ABNMAgentWithCapture(ABNMBokuAgent):
 
         # play the move
         _, win, capture_choice = game.play_tile(move, self.color)
-        if capture_choice:
-            print("was a capture played when required to capture?")
+
+        # early return if win
         if win:
             return win, move
 

@@ -391,6 +391,7 @@ class BokuGame:
     def eval(self):
         """evaluate the game state and return a value"""
         #TODO !this function should be replaced by different functions for different agents
+        #TODO !consider using averages instead of sums for the heuristic
 
         # check for a draw
         if self.history[-1][0] == "skip" and self.history[-2][0] == "skip":

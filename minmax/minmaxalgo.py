@@ -383,35 +383,32 @@ def ab_negmax_capture_tt_2(node: BokuGame,
                              alpha: int=float('-inf'),
                              beta: int=float('inf'),
                              tt: LRUCache=
-                             LRUCache(100000, lambda: {'depth': -1})):
+                             LRUCache(1000000, lambda: {'depth': -1})):
     """Alpha Beta Negamax with transposition table"""
 
     ## Transposition Table Lookup
     old_alpha = alpha
-    hash_val = hash(tuple([tuple([coord, value]) for coord, value in node.occupied_dict.items()]))
+    hash_val = hash(tuple([tuple([tuple([coord, value]) for coord, value in node.occupied_dict.items()]), node.no_play_tile]))
     tt_val = tt.get(hash_val)
-    if tt_val["depth"] > -1:
-        print("tt fund a position but with the from depth")
 
     # get the node from the TT
     if tt_val["depth"] >= depth:
-        # TODO remove the legality check, by removing the move from the TT
         if tt_val["flag"] == "Exact":
-            print("TT hit move")
-            print(coord_to_notation(tt_val["move"]))
-            print(node.history)
+            # print("TT hit move")
+            # print(coord_to_notation(tt_val["move"]))
+            # print(node.history)
             return tt_val["move"], tt_val["capture"], tt_val["value"]
 
         elif tt_val["flag"] == "LowerBound":
             alpha = max(alpha, tt_val["value"])
         elif tt_val["flag"] == "UpperBound":
-            beta = min(beta, tt_val["value"].value)
+            beta = min(beta, tt_val["value"])
         if alpha>=beta:
-            print("TT hit move")
+            # print("TT hit move")
             return tt_val["move"], tt_val["capture"], tt_val["value"]
 
     ## Classic Negamax
-    best_move, move_capture, score = ab_negmax_with_capture_2(node, depth, alpha, beta, False)
+    best_move, move_capture, score = ab_negmax_with_capture_2(node, depth, alpha, beta, True)
 
     ## Transposition Table Update
     flag = ""

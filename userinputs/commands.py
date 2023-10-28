@@ -18,7 +18,8 @@ def run_command(command: str, game: BokuGame):
             # this list comprehension converts from coordinates to notation
             "history" : lambda: print([[coord_to_notation(coord) for coord in action]\
                                         for action in game.history]),
-            "occupied": lambda: print(game.occupied_dict),
+            "occupied": lambda: print({coord_to_notation(coord) : value 
+                                       for coord, value in game.occupied_dict.items()}),
             "heuristic": lambda: print({coord_to_notation(coord): round(value, 3)
                                         for coord, value in game.heuristic[input("enter color: ")].items()}),
             "undo tracker": lambda: print(game.heuristic_undo_tracker),

@@ -9,6 +9,11 @@ from minmax.heuristictile import HeuristicTile
 class BokuGame:
     """the BokuGame class contains all the functions required to play the BokuGame.
        Also includes a function to display the board using matplotlib"""
+    # heuristic weights
+    CENTRICITY = 0.1
+    CAPTURE = 0.5
+    WIN = 1
+
     # TODO add move logging to txt and program reboot
     def __init__(self):
         self.occupied_dict = {coord : "free" for coord in bokudata.all_coords}
@@ -32,7 +37,8 @@ class BokuGame:
             "winner": ""}
 
         for coord, value in bokudata.centricity_values_normalized.items():
-            self.heuristic["move order"].push(HeuristicTile(coord, value * -1))
+            self.heuristic["move order"].push(
+                HeuristicTile(coord, value * BokuGame.CENTRICITY * -1))
 
     def _win_check(self, coord: tuple, win_color: str):
         """this function checks for a win and also returns the value of every tile on the axi,
@@ -71,7 +77,9 @@ class BokuGame:
 
                 if sum(sub_line_addition) > 0:
                     for t_n, value in enumerate(sub_line_addition):
-                        value_dict[line_coords[s_l + t_n]] = max(value * counter, value_dict[line_coords[s_l + t_n]])
+                        new_value = 1 / (value * counter) if value != 0 else 0
+                        value_dict[line_coords[s_l + t_n]] = max(
+                            new_value, value_dict[line_coords[s_l + t_n]])
 
         return win, value_dict
 
@@ -184,7 +192,7 @@ class BokuGame:
             self.history[-1].append(tile)
 
             # return the tile to the move order heuristic
-            heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * -1)
+            heuristic_tile = HeuristicTile(tile, bokudata.centricity_values_normalized[tile] * BokuGame.CENTRICITY * -1)
             self.heuristic["move order"].push(heuristic_tile)
 
             # add to the heuristic undo tracker
@@ -224,12 +232,8 @@ class BokuGame:
         # return the win state (false) and capture choices
         return color_win, color_choice
 
-    def _heuristic_update(self, capture_value_dict, win_value_dict, color, weights=None):
+    def _heuristic_update(self, capture_value_dict, win_value_dict, color):
         """push heuristic values to the heuristic dicts"""
-
-        # set default weights
-        if weights is None:
-            weights = {"capture": 0.5, "win": 1, "centricity": 0.001}
 
         # combine capture and win value dicts
         combined_value_dict = capture_value_dict.copy()
@@ -240,13 +244,12 @@ class BokuGame:
                 combined_value_dict[key] = 0
             else:
                 # scale the value by the capture weight
-                combined_value_dict[key] *= weights["capture"]
+                combined_value_dict[key] *= BokuGame.CAPTURE
 
             # add the weighted win value to the capture value
-            combined_value_dict[key] += value * weights["win"]
-
+            combined_value_dict[key] += value * BokuGame.WIN
             # add the centricity value to the capture value
-            combined_value_dict[key] += self.heuristic["centricity"][key] * weights["centricity"]
+            combined_value_dict[key] += self.heuristic["centricity"][key] * BokuGame.CENTRICITY
 
             # flip heuristic sign, because the priorityq is a min queue
             combined_value_dict[key] *= -1
@@ -258,11 +261,15 @@ class BokuGame:
             if self.occupied_dict[key] == "free":
                 # update the player whos turn it is
                 self.heuristic[color][key] = value
+
+                # count the number of changes to the player's heuristic
                 color_changes += 1
 
                 # update the move ordering peiority queue
                 self.heuristic["move order"].update(HeuristicTile(key, 0),
                                                     HeuristicTile(key, value))
+                
+                # count the number of changes to the move order heuristic
                 move_order_changes += 1
 
         # add the heuristic change to the heuristic undo tracker
@@ -294,6 +301,9 @@ class BokuGame:
             capture_choice, capture_dict = self._capture_check(coord, color)
 
             self._heuristic_update(capture_dict, win_dict, color)
+
+        if win:
+            self.heuristic["winner"] = color
 
         return illegal, win, capture_choice
 
@@ -395,13 +405,12 @@ class BokuGame:
 
         # return a value if not win or draw
         if self.heuristic["winner"] == "":
-            white_len = len(self.heuristic["white"])
+            # get the totsl heuristic value for white and black
             white_score = self.heuristic["white"].total()
-
-            black_len = len(self.heuristic["black"])
             black_score = self.heuristic["black"].total()
 
             # black - white is not a misake, the heuristic is more accurate that way
+            # because the signs are flipped in the heuristic for move ordering with priorityq
             return round((black_score - white_score) * 1000)
 
 def __hash__(self):

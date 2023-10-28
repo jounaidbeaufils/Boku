@@ -20,7 +20,7 @@ def get_player_agent(color) :
 
     # get agent type
     while agent_choice not in agent_dict:
-        agent_choice = input(f"Available agents are: {str(agent_list)}. what agent is {color}? ")
+        agent_choice = input(f"Available agents are: {str(agent_list)}.\nwhat agent is {color}? ")
 
         if agent_choice not in agent_dict:
             print(f"{agent_choice} is not a valid agent")

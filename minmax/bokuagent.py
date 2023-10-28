@@ -6,6 +6,7 @@ from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation, notation_to_coord
 from minmax.minmaxalgo import ab_negmax_capture_tt, ab_negmax_random_capture, ab_negmax_with_capture
 from minmax.transitiontable import LRUCacheWithDefault
+from userinputs.commands import run_command
 
 @abstractmethod
 class BokuAgent(ABC):
@@ -60,6 +61,12 @@ class HumanAgent(BokuAgent):
         while not valid_play:
             # input tile
             tile_notation = input(f"which tile does {self.color.upper()} place? ")
+
+            # check for commands
+            if tile_notation[0] == "\\":
+                run_command(tile_notation[1:], game)
+                continue
+
             if tile_notation == "skip":
                 game.skip_turn()
                 return False, "skip"

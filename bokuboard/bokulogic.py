@@ -77,7 +77,7 @@ class BokuGame:
 
                 if sum(sub_line_addition) > 0:
                     for t_n, value in enumerate(sub_line_addition):
-                        new_value = 1 / (value * counter) if value != 0 else 0
+                        new_value = ((1 / (value * counter)) * 4)**10 if value != 0 else 0
                         value_dict[line_coords[s_l + t_n]] = max(
                             new_value, value_dict[line_coords[s_l + t_n]])
 
@@ -391,6 +391,7 @@ class BokuGame:
     def eval(self):
         """evaluate the game state and return a value"""
         #TODO !this function should be replaced by different functions for different agents
+
         # check for a draw
         if self.history[-1][0] == "skip" and self.history[-2][0] == "skip":
             self.heuristic["winner"] = "draw"
@@ -414,9 +415,27 @@ class BokuGame:
             # black - white is not a misake, the heuristic is more accurate that way
             # because the signs are flipped in the heuristic for move ordering with priorityq
             return round((black_score - white_score) * 1000)
+        
+    def unique_values_count(self, data_dict):
+        """counts the number of unique values in a dictionary"""
+        # Create an empty dictionary to store the counts
+        count_dict = {}
+        
+        # Loop through the dictionary values
+        for value in data_dict.values():
+            value = round(value)
+            if value in count_dict:
+                count_dict[value] += 1
+            else:
+                count_dict[value] = 1
+                
+        return count_dict
+
 
 def __hash__(self):
-    return hash(tuple(self.occupied_dict.items(), self.no_play_tile))
+    hash_val = hash(tuple(tuple(coord, value) for coord, value in self.occupied_dict.items()))
+    print(hash_val)
+    return hash(tuple(tuple(coord, value) for coord, value in self.occupied_dict.items()), self.no_play_tile)
 
 def __eq__(self, other):
     return self.occupied_dict == other.occupied_dict and self.no_play_tile == other.no_play_tile

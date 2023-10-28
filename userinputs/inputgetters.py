@@ -56,8 +56,10 @@ def get_y_or_n(prompt: str) -> bool:
     y_or_n = None
     while y_or_n is None:
         answer = input(prompt)
-        if answer.lower() in {"y", "n"}:
-            y_or_n = True if y_or_n == "y" else False
+        if answer == "y":
+            y_or_n = True
+        elif answer == "n":
+            y_or_n = False
         else:
             print("please enter y or n")
 

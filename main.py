@@ -49,11 +49,14 @@ def start_game(game_n, players, promt_cycle, game_log, random_start):
     game = BokuGame()
 
     #starting board (for testing purposes)
+    print(f"random start: {random_start}")
     if random_start:
         first_move = choice(list(bokudata.all_coords))
         game.play_tile(first_move, "white")
+        print(f"{first_move}")
 
         second_move = choice(list(bokudata.all_coords - {first_move}))
+        print(f"{second_move}")
         game.play_tile(second_move, "black")
 
     #Play the game

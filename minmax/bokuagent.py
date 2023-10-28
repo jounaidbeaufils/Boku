@@ -4,7 +4,7 @@ from random import randint, choice
 from abc import ABC, abstractmethod
 from bokuboard.bokulogic import BokuGame
 from bokuboard.bokudata import coord_to_notation, notation_to_coord
-from minmax.minmaxalgo import ab_negmax_capture_tt, ab_negmax_random_capture, ab_negmax_with_capture, ab_negmax_with_capture_2
+from minmax.minmaxalgo import ab_negmax_capture_tt, ab_negmax_capture_tt_2, ab_negmax_random_capture, ab_negmax_with_capture, ab_negmax_with_capture_2
 from minmax.transitiontable import LRUCacheWithDefault
 from userinputs.commands import run_command
 
@@ -50,7 +50,6 @@ class RandomAgent(BokuAgent):
             game.play_capture(capture, capture_choice)
 
         return win, move
-
 
 class HumanAgent(BokuAgent):
     """Class for human players."""
@@ -213,7 +212,7 @@ class ABNMAgentWithTT(ABNMBokuAgent):
         """play a move"""
 
         # run search
-        move, capture, _ = ab_negmax_capture_tt(node=game, depth=self.depth)
+        move, capture, _ = ab_negmax_capture_tt_2(node=game, depth=self.depth)
 
 
         if move is None:
@@ -222,8 +221,7 @@ class ABNMAgentWithTT(ABNMBokuAgent):
 
         # play the move
         _, win, capture_choice = game.play_tile(move, self.color)
-        if capture_choice:
-            print("was a capture plaed when required to capture?")
+
         if win:
             return win, move
 

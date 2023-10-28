@@ -3,7 +3,7 @@
 from random import choice
 
 from bokuboard.bokulogic import BokuGame
-from minmax.transitiontable import LRUCacheWithDefault
+from minmax.transitiontable import LRUCache, LRUCacheWithDefault
 from bokuboard.bokudata import coord_to_notation
 
 # TODO Iterative deepening
@@ -176,7 +176,7 @@ def ab_negmax_capture_tt(node: BokuGame,
                              depth: int,
                              alpha: int=float('-inf'),
                              beta: int=float('inf'),
-                             tt: LRUCacheWithDefault= 
+                             tt: LRUCacheWithDefault=
                              LRUCacheWithDefault(100000, lambda: {'depth': -1})):
     """Alpha Beta Negamax with transposition table"""
 
@@ -270,9 +270,10 @@ def ab_negmax_capture_tt(node: BokuGame,
 def ab_negmax_with_capture_2(node: BokuGame,
                              depth: int,
                              alpha: int=float('-inf'),
-                             beta: int=float('inf')):
+                             beta: int=float('inf'),
+                             tt: bool=False):
     """negamax algorithm with alpha beta pruning"""
-
+    recursive_func = ab_negmax_capture_tt_2 if tt else ab_negmax_with_capture_2
     ### Base Case: check if we are at a leaf node
     # recusion depth is is reached or the game is over (win, lose, draw)
     if depth == 0 or node.heuristic["winner"] != "":
@@ -302,13 +303,6 @@ def ab_negmax_with_capture_2(node: BokuGame,
         # play the move (generate the successor state)
         _, _, capture_choice = node.play_tile(move.tile, color)
 
-        """
-        if len(node.history) < 5:
-            print([[coord_to_notation(coord) for coord in action] for action in node.history])
-
-        else:
-            print([[coord_to_notation(coord) for coord in action] for action in node.history[-5:]])
-        """
         # check if there is a capture
         ## checking all "submoves" of this capturing move
         if capture_choice:
@@ -321,7 +315,6 @@ def ab_negmax_with_capture_2(node: BokuGame,
             # break flag is used to break out of both loops
             break_flag = False
             for capture in capture_choice:
-                print(f"capture loop affected: {[coord_to_notation(move.tile), coord_to_notation(capture)]}")
                 # play the move (generate the successor state)
                 _, _, _ = node.play_tile(move.tile, color)
 
@@ -329,7 +322,7 @@ def ab_negmax_with_capture_2(node: BokuGame,
                 node.play_capture(capture, capture_choice)
 
                 # call negamax on the successor state, flip the signs
-                _, _, value = ab_negmax_with_capture_2(node, depth - 1, -beta, -alpha)
+                _, _, value = recursive_func(node, depth - 1, -beta, -alpha)
                 value *= -1
 
                 # undo the move, so we only ever use one BokuGame object
@@ -359,7 +352,7 @@ def ab_negmax_with_capture_2(node: BokuGame,
         ## checking the move "normally"
         else:
             # call negamax on the successor state, flip the signs
-            _, _, value = ab_negmax_with_capture_2(node, depth - 1, -beta, -alpha)
+            _, _, value = recursive_func(node, depth - 1, -beta, -alpha)
             value *= -1
 
             # undo the move, so we only ever use one BokuGame object
@@ -377,3 +370,64 @@ def ab_negmax_with_capture_2(node: BokuGame,
                 break
 
     return best_move, best_capture, score
+
+def ab_negmax_capture_tt_2(node: BokuGame,
+                             depth: int,
+                             alpha: int=float('-inf'),
+                             beta: int=float('inf'),
+                             tt: LRUCache=
+                             LRUCache(100000, lambda: {'depth': -1})):
+    """Alpha Beta Negamax with transposition table"""
+
+    ## Transposition Table Lookup
+    old_alpha = alpha
+    hash_val = hash(tuple([tuple([coord, value]) for coord, value in node.occupied_dict.items()]))
+    tt_val = tt.get(hash_val)
+    if tt_val["depth"] > -1:
+        print("tt fund a position but with the from depth")
+        
+    # get the node from the TT
+    if tt_val["depth"] >= depth:
+        # TODO remove the legality check, by removing the move from the TT
+        if tt_val["flag"] == "Exact":
+            print("TT hit move")
+            print(coord_to_notation(tt_val["move"]))
+            print(node.history)
+            return tt_val["move"], tt_val["capture"], tt_val["value"]
+
+        elif tt_val["flag"] == "LowerBound":
+            alpha = max(alpha, tt_val["value"])
+        elif tt_val["flag"] == "UpperBound":
+            beta = min(beta, tt_val["value"].value)
+        if alpha>=beta:
+            print("TT hit move")
+            return tt_val["move"], tt_val["capture"], tt_val["value"]
+
+    ## Classic Negamax
+    best_move, move_capture, score = ab_negmax_with_capture_2(node, depth, alpha, beta, False)
+
+    ## Transposition Table Update
+    flag = ""
+    #Fail-low result implies an upper bound
+    if score <= old_alpha:
+        flag = "UpperBound"
+
+    # Fail-high result implies a lower bound
+    elif score >= beta:
+        flag = "LowerBound"
+    # this part stores information in the TT
+    else:
+        flag = "Exact"
+
+    # actually update the TT
+    tt_val["flag"] = flag
+    tt_val["value"] = score
+    tt_val["move"] = best_move
+    tt_val["capture"] = move_capture
+    tt_val["depth"] = depth
+    tt.put(hash_val, tt_val)
+
+    if tt.get(hash_val)["depth"] == -1:
+        print("TT update failed")
+
+    return best_move, move_capture, score

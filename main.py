@@ -1,5 +1,6 @@
 """This module is used to run a human vs human game of boku"""
 from random import choice
+import time
 
 from bokuboard import bokudata
 from bokuboard.bokulogic import BokuGame
@@ -49,14 +50,11 @@ def start_game(game_n, players, promt_cycle, game_log, random_start):
     game = BokuGame()
 
     #starting board (for testing purposes)
-    print(f"random start: {random_start}")
     if random_start:
         first_move = choice(list(bokudata.all_coords))
         game.play_tile(first_move, "white")
-        print(f"{first_move}")
 
         second_move = choice(list(bokudata.all_coords - {first_move}))
-        print(f"{second_move}")
         game.play_tile(second_move, "black")
 
     #Play the game
@@ -70,7 +68,9 @@ def start_game(game_n, players, promt_cycle, game_log, random_start):
             print(f"\ngame: {game_n}, turn: {turn},  game balance: {last_game_balance} ")
 
         player = players[len(game.history) % 2]
+        start_time = time.time()
         _, move = player.play(game)
+        end_time = time.time()
 
         # check that the move is legal, and was played
         if game.history[-1][0] == move:
@@ -83,7 +83,7 @@ def start_game(game_n, players, promt_cycle, game_log, random_start):
             # print the move and possible capture
             # TODO get skip move sorted in all Agents
             move_str = "skip" if move == "skip" else coord_to_notation(move)
-            print(f"{player.color} plays {move_str}{capture_sentense}")
+            print(f"{player.color} plays {move_str}{capture_sentense}. ({round(end_time - start_time, 5)} seconds)")
 
         # check if the playing player has won
         game_balance = game.eval()

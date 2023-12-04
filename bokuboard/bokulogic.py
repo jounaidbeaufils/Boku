@@ -77,7 +77,7 @@ class BokuGame:
 
                 if sum(sub_line_addition) > 0:
                     for t_n, value in enumerate(sub_line_addition):
-                        new_value = ((1 / (value * counter)) * 4)**10 if value != 0 else 0
+                        new_value = ((1 / (value * counter)) * 4)**6 if value != 0 else 0
                         value_dict[line_coords[s_l + t_n]] = max(
                             new_value, value_dict[line_coords[s_l + t_n]])
 
@@ -391,6 +391,7 @@ class BokuGame:
     def eval(self):
         """evaluate the game state and return a value"""
         #TODO !this function should be replaced by different functions for different agents
+        #TODO !consider using averages instead of sums for the heuristic
 
         # check for a draw
         if self.history[-1][0] == "skip" and self.history[-2][0] == "skip":
@@ -414,7 +415,7 @@ class BokuGame:
 
             # black - white is not a misake, the heuristic is more accurate that way
             # because the signs are flipped in the heuristic for move ordering with priorityq
-            return round((black_score - white_score) * 1000)
+            return round((black_score - white_score) * 100)
 
     def unique_values_count(self, data_dict):
         """counts the number of unique values in a dictionary"""
